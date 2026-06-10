@@ -113,7 +113,7 @@ export default function Sidebar({
       {/* Header */}
       <div className="sidebar-header">
         <div className="logo" onClick={() => window.location.reload()} title="Actualiser">
-          <img src="/logo_agence_urbaine.png" alt="Agence Urbaine" className="logo-icon" />
+          <img src="/logo_chatbot.png" alt="Agence Urbaine" className="logo-icon" />
         </div>
         <button
           className="sidebar-collapse-btn"

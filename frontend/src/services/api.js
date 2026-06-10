@@ -30,3 +30,14 @@ export async function getOCRStatus() {
 export async function clearHistory(sessionId) {
   await fetch(`${BASE}/chat/history/${sessionId}`, { method: "DELETE" });
 }
+
+export async function transcribeAudio(audioBlob) {
+  const form = new FormData();
+  form.append("audio", audioBlob, "audio.webm");
+  const res = await fetch(`${BASE}/chat/transcribe`, { method: "POST", body: form });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Transcription failed");
+  }
+  return res.json(); // { text }
+}

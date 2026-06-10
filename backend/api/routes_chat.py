@@ -1,8 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 import uuid
+import os
+import tempfile
 from chat.engine import chat, get_history
+from chat.stt import transcribe_audio
 
 router = APIRouter()
 
@@ -47,3 +50,24 @@ def clear_history(session_id: str):
     cur.close()
     conn.close()
     return {"message": "History cleared", "session_id": session_id}
+
+
+@router.post("/transcribe")
+async def transcribe(audio: UploadFile = File(...)):
+    """Transcribe an audio file using faster-whisper."""
+    try:
+        # Create a temporary file to store the audio
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+            content = await audio.read()
+            tmp.write(content)
+            tmp_path = tmp.name
+
+        # Transcribe
+        text = transcribe_audio(tmp_path)
+
+        # Cleanup
+        os.unlink(tmp_path)
+
+        return {"text": text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Transcription error: {str(e)}")

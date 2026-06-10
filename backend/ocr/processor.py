@@ -144,4 +144,3 @@ def parse_articles(text: str) -> List[Dict]:
             })
 
     return articles
-    

@@ -7,7 +7,7 @@ import { sendMessage, clearHistory } from "./services/api";
 
 const WELCOME = {
   role: "assistant",
-  content: `مرحباً! أنا مساعدك القانوني لشؤون التعمير بخنيفرة 🏛️
+  content: `مرحباً! أنا مساعدك القانوني لشؤون التعمير بالمغرب 🏛️
 
 أنا متخصص في **القانون 12-90** المتعلق بالتعمير بالمغرب.
 
@@ -42,9 +42,9 @@ function extractTitle(messages) {
 }
 
 export default function App() {
-  const [sessionId, setSessionId]   = useState(uuidv4());
-  const [messages, setMessages]     = useState([WELCOME]);
-  const [loading, setLoading]       = useState(false);
+  const [sessionId, setSessionId] = useState(uuidv4());
+  const [messages, setMessages] = useState([WELCOME]);
+  const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth <= 900);
   const [conversations, setConversations] = useState(loadConversations);
@@ -151,7 +151,7 @@ export default function App() {
   };
 
   const handleNewChat = async () => {
-    await clearHistory(sessionId).catch(() => {});
+    await clearHistory(sessionId).catch(() => { });
     setSessionId(uuidv4());
     setMessages([WELCOME]);
   };
@@ -198,7 +198,7 @@ export default function App() {
       />
 
       {/* Overlay for mobile */}
-      <div 
+      <div
         className={`sidebar-overlay ${sidebarCollapsed ? 'hidden' : ''}`}
         onClick={() => setSidebarCollapsed(true)}
       />
@@ -206,8 +206,8 @@ export default function App() {
       {/* Main chat */}
       <main className="chat-main">
         <div className="chat-header">
-          <button 
-            className="mobile-menu-btn" 
+          <button
+            className="mobile-menu-btn"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             title="Menu"
           >
@@ -218,8 +218,8 @@ export default function App() {
             </svg>
           </button>
           <h1>Assistant Urbanisme <span className="law-badge">Loi 12-90</span></h1>
-          <button 
-            className="theme-toggle-btn" 
+          <button
+            className="theme-toggle-btn"
             onClick={() => setIsLightMode(!isLightMode)}
             title="Basculer le thème"
           >
@@ -229,10 +229,10 @@ export default function App() {
 
         <div className="messages-area">
           {messages.map((msg, i) => (
-            <MessageBubble 
-              key={i} 
-              role={msg.role} 
-              content={msg.content} 
+            <MessageBubble
+              key={i}
+              role={msg.role}
+              content={msg.content}
               onEdit={(newText) => handleEditMessage(i, newText)}
               onDelete={() => handleDeleteMessage(i)}
             />

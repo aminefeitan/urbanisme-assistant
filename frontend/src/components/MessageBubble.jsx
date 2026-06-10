@@ -16,35 +16,39 @@ export default function MessageBubble({ role, content, onEdit, onDelete }) {
   return (
     <div className={`bubble-wrap ${isUser ? "bubble-user" : "bubble-bot"}`}>
       {!isUser && (
-        <div className="bot-avatar">
-          <span>⚖️</span>
+        <div className="bot-avatar" style={{ overflow: "hidden", borderRadius: "50%", background: "#fff" }}>
+          <img
+            src="/logo_chatbot.png"
+            alt="Bot"
+            style={{ width: "100%", height: "100%", objectFit: "contain", transform: "scale(1.81)" }}
+          />
         </div>
       )}
-      <div className={`bubble ${isUser ? "bubble-user-inner" : "bubble-bot-inner"}`} style={{position: "relative"}} dir="auto">
+      <div className={`bubble ${isUser ? "bubble-user-inner" : "bubble-bot-inner"}`} style={{ position: "relative" }} dir="auto">
         {isUser ? (
           isEditing ? (
             <div className="edit-mode">
-              <textarea 
-                value={editVal} 
-                onChange={(e) => setEditVal(e.target.value)} 
-                rows={3} 
+              <textarea
+                value={editVal}
+                onChange={(e) => setEditVal(e.target.value)}
+                rows={3}
                 style={{
-                  width: "100%", 
+                  width: "100%",
                   minWidth: "250px",
-                  background: "transparent", 
-                  color: "inherit", 
-                  border: "1px solid rgba(255,255,255,0.3)", 
-                  borderRadius: "8px", 
-                  padding: "8px", 
+                  background: "transparent",
+                  color: "inherit",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  borderRadius: "8px",
+                  padding: "8px",
                   marginBottom: "8px",
                   fontFamily: "inherit",
                   resize: "vertical"
-                }} 
+                }}
                 dir="auto"
               />
-              <div style={{display: "flex", gap: "8px", justifyContent: "flex-end"}}>
-                <button onClick={() => setIsEditing(false)} style={{padding: "6px 12px", background: "rgba(0,0,0,0.1)", border: "none", color: "inherit", borderRadius: "6px", cursor: "pointer"}}>Annuler</button>
-                <button onClick={handleSave} style={{padding: "6px 12px", background: "var(--accent2)", border: "none", color: "white", borderRadius: "6px", cursor: "pointer"}}>Envoyer</button>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                <button onClick={() => setIsEditing(false)} style={{ padding: "6px 12px", background: "rgba(0,0,0,0.1)", border: "none", color: "inherit", borderRadius: "6px", cursor: "pointer" }}>Annuler</button>
+                <button onClick={handleSave} style={{ padding: "6px 12px", background: "var(--accent2)", border: "none", color: "white", borderRadius: "6px", cursor: "pointer" }}>Envoyer</button>
               </div>
             </div>
           ) : (
