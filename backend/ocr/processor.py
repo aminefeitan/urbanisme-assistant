@@ -12,11 +12,8 @@ from typing import List, Dict
 
 # ─── Windows PATH fix ────────────────────────────────────────────────────────
 # Force Tesseract path for Windows (Python doesn't always inherit PATH from CMD)
-TESSERACT_PATHS = [
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
-    r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
-    r"C:\Users\yassi\AppData\Local\Programs\Tesseract-OCR\tesseract.exe",
-]
+TESSERACT_PATHS = [r"C:\Program Files\Tesseract-OCR\tesseract.exe"]
+
 for _t in TESSERACT_PATHS:
     if os.path.exists(_t):
         pytesseract.pytesseract.tesseract_cmd = _t
@@ -26,13 +23,8 @@ else:
     print("[OCR] ⚠️  Tesseract not found at known paths — relying on PATH")
 
 # Poppler path for Windows (needed by pdf2image)
-POPPLER_PATHS = [
-    r"C:\poppler-25.12.0\Library\bin",
-    r"C:\poppler\Library\bin",
-    r"C:\poppler\bin",
-    r"C:\Program Files\poppler\Library\bin",
-    r"C:\Program Files\poppler\bin",
-]
+POPPLER_PATHS = [r"C:\poppler-25.12.0\Library\bin"]
+
 POPPLER_PATH = None
 for _p in POPPLER_PATHS:
     if os.path.exists(_p):
@@ -152,3 +144,4 @@ def parse_articles(text: str) -> List[Dict]:
             })
 
     return articles
+    

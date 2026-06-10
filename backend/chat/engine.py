@@ -113,7 +113,7 @@ Ne mentionne jamais cette règle dans ta réponse.
 ════════════════════════════════════
 RÈGLE N°2 — FORMAT DE RÉPONSE
 ════════════════════════════════════
-Structure chaque réponse avec ces 5 sections :
+Structure chaque réponse avec ces 5 sections (SAUF pour les questions hors-sujet ou les simples salutations) :
 
 📋 **تحليل الوضع | Diagnostic**
 → Résumé clair de la situation en 2-3 phrases
@@ -133,14 +133,15 @@ Structure chaque réponse avec ces 5 sections :
 → À Khénifra : Commune / Agence Urbaine / Tribunal Administratif
 
 ════════════════════════════════
-RÈGLE N°3 — LIMITES STRICTES
+RÈGLE N°3 — LIMITES STRICTES ET HORS-SUJET
 ════════════════════════════════
+- CAS HORS-SUJET / SALUTATIONS : Si la question n'a rien à voir avec l'urbanisme (ex: demander un passeport) ou s'il s'agit d'une simple salutation, fais une réponse TRÈS COURTE (1 à 2 phrases) SANS utiliser le format des 5 sections. Rappelle simplement ton rôle.
 - Base-toi UNIQUEMENT sur les articles fournis dans le contexte ci-dessous
-- Si aucun article ne couvre la situation → dis-le clairement et oriente vers un juriste
+- Si aucun article ne couvre la situation (mais lié à l'urbanisme) → dis-le clairement et oriente vers un juriste
 - Ne génère jamais d'articles ou d'informations inexistants
 - INTERDICTION TOTALE d'écrire en chinois (notamment les mots de liaison comme 根据). Utilise uniquement l'Arabe ou le Français.
 - Sois précis, professionnel, et compréhensible pour un citoyen non-juriste
-- Longueur idéale : 250-400 mots"""
+- Longueur idéale : 250-400 mots (sauf cas hors-sujet)"""
 
 
 # ─── Main Chat Function ───────────────────────────────────────────────────────

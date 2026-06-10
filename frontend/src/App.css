@@ -555,7 +555,6 @@ body {
 
 .bubble-user {
   margin-left: auto;
-  flex-direction: row-reverse;
 }
 
 .bubble-bot {
@@ -594,7 +593,8 @@ body {
   border-radius: var(--radius);
   line-height: 1.65;
   font-size: 0.91rem;
-  max-width: calc(100% - 80px);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .bubble-bot-inner {
@@ -602,7 +602,6 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius) var(--radius) var(--radius) 4px;
   color: var(--text);
-  direction: rtl;
 }
 
 .bubble-user-inner {
@@ -610,7 +609,6 @@ body {
   border: 1px solid rgba(56, 189, 248, 0.3);
   border-radius: var(--radius) var(--radius) 4px var(--radius);
   color: var(--text);
-  direction: rtl;
 }
 
 /* Markdown inside bot bubbles */
@@ -628,8 +626,10 @@ body {
 }
 
 .bubble-bot-inner ul,
-.bubble-bot-inner ol {
-  padding-right: 20px;
+.bubble-bot-inner ol,
+.bubble-user-inner ul,
+.bubble-user-inner ol {
+  padding-inline-start: 25px;
   margin: 6px 0;
 }
 
@@ -637,8 +637,9 @@ body {
   margin: 3px 0;
 }
 
-.bubble-bot-inner p {
+.bubble-bot-inner p, .bubble-user-inner p {
   margin: 4px 0;
+  white-space: pre-wrap;
 }
 
 .bubble-bot-inner hr {
@@ -651,18 +652,25 @@ body {
 .msg-actions {
   display: flex;
   gap: 6px;
-  margin-top: 8px;
-  justify-content: flex-end;
+  position: absolute;
+  bottom: -18px;
+  right: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 4px;
+  border-radius: 8px;
   opacity: 0;
-  transition: opacity 0.2s ease;
-  height: 0;
-  overflow: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(4px);
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .bubble-wrap:hover .msg-actions {
   opacity: 1;
-  height: auto;
-  overflow: visible;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .action-icon-btn {
@@ -789,7 +797,6 @@ body {
   resize: none;
   outline: none;
   transition: border-color 0.2s;
-  direction: rtl;
   line-height: 1.5;
 }
 
@@ -918,7 +925,6 @@ body {
 
 @media (max-width: 480px) {
   .bubble {
-    max-width: 100%;
     font-size: 0.85rem;
   }
   

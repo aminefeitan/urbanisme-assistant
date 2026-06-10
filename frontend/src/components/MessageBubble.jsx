@@ -20,7 +20,7 @@ export default function MessageBubble({ role, content, onEdit, onDelete }) {
           <span>⚖️</span>
         </div>
       )}
-      <div className={`bubble ${isUser ? "bubble-user-inner" : "bubble-bot-inner"}`} style={{position: "relative"}}>
+      <div className={`bubble ${isUser ? "bubble-user-inner" : "bubble-bot-inner"}`} style={{position: "relative"}} dir="auto">
         {isUser ? (
           isEditing ? (
             <div className="edit-mode">
@@ -30,6 +30,7 @@ export default function MessageBubble({ role, content, onEdit, onDelete }) {
                 rows={3} 
                 style={{
                   width: "100%", 
+                  minWidth: "250px",
                   background: "transparent", 
                   color: "inherit", 
                   border: "1px solid rgba(255,255,255,0.3)", 
