@@ -178,7 +178,7 @@ def chat(query: str, session_id: str, history: List[Dict] = None) -> str:
     if total_articles == 0:
         warning = (
             "⚠️ **قاعدة البيانات فارغة | Base de données vide**\n\n"
-            "مازال ما loadedش PDF ديال لوي 12-90 فالنظام.\n"
+            "مازال ما loadedش PDF ديال القانون 12-90 فالنظام.\n"
             "Aucun article de la Loi 12-90 n'est encore chargé dans la base.\n\n"
             "**خاصك دير:** panneau gauche → **Charger PDF loi 12-90** → sélectionne le PDF\n\n"
             "OCR غادي يخدم في arrière-plan (~10-15 min) — من بعد يرجع للسؤال ديالك ✅"
@@ -243,7 +243,7 @@ def chat(query: str, session_id: str, history: List[Dict] = None) -> str:
 
     # Add DB source indicator
     if db_used:
-        answer += f"\n\n---\n*📚 بناءً على {len(relevant)} مواد من لوي 12-90 | Basé sur {len(relevant)} articles de la Loi 12-90*"
+        answer += f"\n\n---\n*📚 بناءً على {len(relevant)} مواد من القانون 12-90 | Basé sur {len(relevant)} articles de la Loi 12-90*"
 
     # Step 6: persist
     _save_message(session_id, "user", query)

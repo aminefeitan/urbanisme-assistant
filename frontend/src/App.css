@@ -2,32 +2,53 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
 
 :root {
-  --bg: #020617; /* Slate 950 - deepest blue-black */
-  --surface: #0f172a; /* Slate 900 */
-  --surface2: #1e293b; /* Slate 800 */
-  --border: #334155; /* Slate 700 */
-  --accent: #fbbf24; /* Amber 400 - Vibrant Moroccan Gold */
-  --accent2: #38bdf8; /* Sky 400 - Vibrant Light Blue */
-  --text: #f8fafc; /* Slate 50 */
-  --muted: #94a3b8; /* Slate 400 */
-  --user-bg: #0c4a6e; /* Sky 900 - Deep Blue for user */
-  --bot-bg: #0f172a; /* Slate 900 */
-  --radius: 16px; /* Modern slightly rounder corners */
+  --bg: #020617;
+  /* Slate 950 - deepest blue-black */
+  --surface: #0f172a;
+  /* Slate 900 */
+  --surface2: #1e293b;
+  /* Slate 800 */
+  --border: #334155;
+  /* Slate 700 */
+  --accent: #fbbf24;
+  /* Amber 400 - Vibrant Moroccan Gold */
+  --accent2: #38bdf8;
+  /* Sky 400 - Vibrant Light Blue */
+  --text: #f8fafc;
+  /* Slate 50 */
+  --muted: #94a3b8;
+  /* Slate 400 */
+  --user-bg: #0c4a6e;
+  /* Sky 900 - Deep Blue for user */
+  --bot-bg: #0f172a;
+  /* Slate 900 */
+  --radius: 16px;
+  /* Modern slightly rounder corners */
   --sidebar-w: 280px;
   --sidebar-collapsed-w: 68px;
 }
 
 [data-theme="light"] {
-  --bg: #f8fafc; /* Slate 50 */
-  --surface: #ffffff; /* White */
-  --surface2: #f1f5f9; /* Slate 100 */
-  --border: #e2e8f0; /* Slate 200 */
-  --accent: #d97706; /* Darker Amber for contrast */
-  --accent2: #0284c7; /* Darker Sky blue */
-  --text: #000000; /* Pure black text */
-  --muted: #000000; /* Pure black instead of gray */
-  --user-bg: #e0f2fe; /* Sky 100 - Light blue for user bubbles */
-  --bot-bg: #ffffff; /* White for bot bubbles */
+  --bg: #f8fafc;
+  /* Slate 50 */
+  --surface: #ffffff;
+  /* White */
+  --surface2: #f1f5f9;
+  /* Slate 100 */
+  --border: #e2e8f0;
+  /* Slate 200 */
+  --accent: #d97706;
+  /* Darker Amber for contrast */
+  --accent2: #0284c7;
+  /* Darker Sky blue */
+  --text: #000000;
+  /* Pure black text */
+  --muted: #000000;
+  /* Pure black instead of gray */
+  --user-bg: #e0f2fe;
+  /* Sky 100 - Light blue for user bubbles */
+  --bot-bg: #ffffff;
+  /* White for bot bubbles */
 }
 
 *,
@@ -635,7 +656,8 @@ body {
   margin: 3px 0;
 }
 
-.bubble-bot-inner p, .bubble-user-inner p {
+.bubble-bot-inner p,
+.bubble-user-inner p {
   margin: 4px 0;
   white-space: pre-wrap;
 }
@@ -707,6 +729,8 @@ body {
   gap: 5px;
   padding: 14px 18px;
 }
+
+
 
 .typing-indicator span {
   display: inline-block;
@@ -846,9 +870,17 @@ body {
 }
 
 @keyframes pulse-red {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 
 .mic-spinner {
@@ -926,7 +958,7 @@ body {
     display: block;
     backdrop-filter: blur(2px);
   }
-  
+
   .sidebar-overlay.hidden {
     display: none;
   }
@@ -940,20 +972,20 @@ body {
   .bubble {
     font-size: 0.85rem;
   }
-  
+
   .input-bar textarea {
     font-size: 0.85rem;
     padding: 10px 12px;
   }
-  
+
   .chat-header {
     padding: 10px 16px;
   }
-  
+
   .chat-header h1 {
     font-size: 0.9rem;
   }
-  
+
   .logo-title {
     font-size: 1rem;
   }
