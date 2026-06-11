@@ -4,6 +4,7 @@ import MessageBubble from "./components/MessageBubble";
 import InputBar from "./components/InputBar";
 import Sidebar from "./components/Sidebar";
 import { sendMessage, clearHistory } from "./services/api";
+import LandingPage from "./components/LandingPage";
 
 const WELCOME = {
   role: "assistant",
@@ -42,6 +43,7 @@ function extractTitle(messages) {
 }
 
 export default function App() {
+  const [hasStarted, setHasStarted] = useState(false);
   const [sessionId, setSessionId] = useState(uuidv4());
   const [messages, setMessages] = useState([WELCOME]);
   const [loading, setLoading] = useState(false);
@@ -183,6 +185,10 @@ export default function App() {
       return updated;
     });
   };
+
+  if (!hasStarted) {
+    return <LandingPage onStart={() => setHasStarted(true)} />;
+  }
 
   return (
     <div className="app-layout">
