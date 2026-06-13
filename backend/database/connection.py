@@ -44,6 +44,33 @@ def init_db():
         WITH (lists = 50);
     """)
 
+    # Users table
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            name VARCHAR(255),
+            first_name VARCHAR(255),
+            last_name VARCHAR(255),
+            password_hash VARCHAR(255),
+            is_verified BOOLEAN DEFAULT false,
+            created_at TIMESTAMP DEFAULT NOW(),
+            last_login TIMESTAMP
+        );
+    """)
+
+    # OTP codes table
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS otp_codes (
+            id SERIAL PRIMARY KEY,
+            email VARCHAR(255) NOT NULL,
+            code VARCHAR(6) NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
+            used BOOLEAN DEFAULT false,
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+    """)
+
     # Chat history
     cur.execute("""
         CREATE TABLE IF NOT EXISTS chat_messages (
@@ -51,11 +78,45 @@ def init_db():
             session_id VARCHAR(100) NOT NULL,
             role       VARCHAR(20)  NOT NULL,
             content    TEXT         NOT NULL,
+            user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
             created_at TIMESTAMP DEFAULT NOW()
         );
     """)
 
-    conn.commit()
+    # Conversations table — groups chat_messages by session for a user
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS conversations (
+            id VARCHAR(100) PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            title VARCHAR(255) DEFAULT 'Nouvelle conversation',
+            pinned BOOLEAN DEFAULT false,
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+        );
+    """)
+
+    # Try to add user_id column if table already existed without it
+    conn.commit() # Commit the creations first
+    try:
+        cur.execute("ALTER TABLE chat_messages ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE SET NULL;")
+        conn.commit()
+    except psycopg2.Error:
+        conn.rollback() # Ignore if column already exists
+
+    # Migrate existing users table — add new columns if missing
+    new_columns = [
+        ("first_name", "VARCHAR(255)"),
+        ("last_name", "VARCHAR(255)"),
+        ("password_hash", "VARCHAR(255)"),
+        ("is_verified", "BOOLEAN DEFAULT false"),
+    ]
+    for col_name, col_type in new_columns:
+        try:
+            cur.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type};")
+            conn.commit()
+        except psycopg2.Error:
+            conn.rollback()
+
     cur.close()
     conn.close()
     print("✅ Database initialized successfully")

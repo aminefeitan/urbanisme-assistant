@@ -160,7 +160,7 @@ def _count_articles() -> int:
         return 0
 
 
-def chat(query: str, session_id: str, history: List[Dict] = None) -> str:
+def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int = None) -> str:
     """
     RAG pipeline:
     1. Check DB has articles
@@ -183,8 +183,8 @@ def chat(query: str, session_id: str, history: List[Dict] = None) -> str:
             "**خاصك دير:** panneau gauche → **Charger PDF loi 12-90** → sélectionne le PDF\n\n"
             "OCR غادي يخدم في arrière-plan (~10-15 min) — من بعد يرجع للسؤال ديالك ✅"
         )
-        _save_message(session_id, "user", query)
-        _save_message(session_id, "assistant", warning)
+        _save_message(session_id, "user", query, user_id)
+        _save_message(session_id, "assistant", warning, user_id)
         return warning
 
     # Step 2: retrieve relevant articles
@@ -246,8 +246,8 @@ def chat(query: str, session_id: str, history: List[Dict] = None) -> str:
         answer += f"\n\n---\n*📚 بناءً على {len(relevant)} مواد من القانون 12-90 | Basé sur {len(relevant)} articles de la Loi 12-90*"
 
     # Step 6: persist
-    _save_message(session_id, "user", query)
-    _save_message(session_id, "assistant", answer)
+    _save_message(session_id, "user", query, user_id)
+    _save_message(session_id, "assistant", answer, user_id)
 
     return answer
 
@@ -267,12 +267,12 @@ def get_history(session_id: str) -> List[Dict]:
     return [{"role": r[0], "content": r[1]} for r in rows]
 
 
-def _save_message(session_id: str, role: str, content: str):
+def _save_message(session_id: str, role: str, content: str, user_id: int = None):
     conn = get_connection()
     cur  = conn.cursor()
     cur.execute(
-        "INSERT INTO chat_messages (session_id, role, content) VALUES (%s, %s, %s)",
-        (session_id, role, content),
+        "INSERT INTO chat_messages (session_id, role, content, user_id) VALUES (%s, %s, %s, %s)",
+        (session_id, role, content, user_id),
     )
     conn.commit()
     cur.close()

@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from database.connection import init_db
 from api.routes_chat import router as chat_router
 from api.routes_ocr import router as ocr_router
+from api.routes_auth import router as auth_router
 from ocr.processor import diagnose
 
 @asynccontextmanager
@@ -27,9 +28,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
 app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
 app.include_router(ocr_router, prefix="/api/ocr", tags=["OCR"])
+
 
 @app.get("/")
 def health():
     return {"status": "ok", "project": "Khenifra Urban Chatbot", "loi": "12-90"}
+

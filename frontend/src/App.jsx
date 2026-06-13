@@ -3,8 +3,17 @@ import { v4 as uuidv4 } from "uuid";
 import MessageBubble from "./components/MessageBubble";
 import InputBar from "./components/InputBar";
 import Sidebar from "./components/Sidebar";
-import { sendMessage, clearHistory } from "./services/api";
+import {
+  sendMessage,
+  clearHistory,
+  getMe,
+  getConversations,
+  deleteConversation as apiDeleteConversation,
+  pinConversation as apiPinConversation,
+  getConversationMessages,
+} from "./services/api";
 import LandingPage from "./components/LandingPage";
+import AuthPage from "./components/AuthPage";
 
 const WELCOME = {
   role: "assistant",
@@ -20,20 +29,6 @@ const WELCOME = {
 اكتب شكايتك أو سؤالك بالدارجة أو الفرنسية 👇`,
 };
 
-const STORAGE_KEY = "urbanisme_conversations";
-
-function loadConversations() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch {
-    return [];
-  }
-}
-
-function saveConversations(convos) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(convos));
-}
-
 /** Extract a short title from the first user message */
 function extractTitle(messages) {
   const first = messages.find((m) => m.role === "user");
@@ -43,16 +38,26 @@ function extractTitle(messages) {
 }
 
 export default function App() {
-  const [hasStarted, setHasStarted] = useState(false);
+  // appState: 'landing' | 'login' | 'register' | 'guest' | 'chat'
+  const [appState, setAppState] = useState("landing");
+  const [user, setUser] = useState(null);
   const [sessionId, setSessionId] = useState(uuidv4());
   const [messages, setMessages] = useState([WELCOME]);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth <= 900);
-  const [conversations, setConversations] = useState(loadConversations);
-  const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem("theme") === "light");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => window.innerWidth <= 900
+  );
+  const [conversations, setConversations] = useState([]);
+  const [isLightMode, setIsLightMode] = useState(
+    () => localStorage.getItem("theme") === "light"
+  );
   const bottomRef = useRef(null);
 
+  const isGuest = appState === "guest";
+  const isAuthenticated = appState === "chat" && user !== null;
+
+  // --- Theme ---
   useEffect(() => {
     localStorage.setItem("theme", isLightMode ? "light" : "dark");
     if (isLightMode) {
@@ -62,66 +67,72 @@ export default function App() {
     }
   }, [isLightMode]);
 
+  // --- Auto-login from token ---
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      getMe()
+        .then((data) => {
+          setUser(data.user);
+          setAppState("chat");
+        })
+        .catch(() => {
+          localStorage.removeItem("authToken");
+        });
+    }
+  }, []);
+
+  // --- Load conversations from DB when authenticated ---
+  const loadConversationsFromDB = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const convos = await getConversations();
+      setConversations(convos);
+    } catch (err) {
+      console.error("Failed to load conversations:", err);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    loadConversationsFromDB();
+  }, [loadConversationsFromDB]);
+
+  // --- Auto-scroll ---
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  /** Persist current conversation whenever messages change (skip welcome-only) */
-  const persistCurrent = useCallback(
-    (msgs) => {
-      // Only save if there's at least one user message
-      if (!msgs.some((m) => m.role === "user")) return;
-
-      setConversations((prev) => {
-        const idx = prev.findIndex((c) => c.id === sessionId);
-        const existing = idx >= 0 ? prev[idx] : null;
-        const entry = {
-          id: sessionId,
-          title: extractTitle(msgs),
-          updatedAt: Date.now(),
-          messages: msgs,
-          pinned: existing?.pinned || false,
-        };
-        let updated;
-        if (idx >= 0) {
-          updated = [...prev];
-          updated[idx] = entry;
-        } else {
-          updated = [entry, ...prev];
-        }
-        // Keep latest 30 conversations
-        updated = updated.slice(0, 30);
-        saveConversations(updated);
-        return updated;
-      });
-    },
-    [sessionId]
-  );
-
+  // --- Send message ---
   const handleSend = async (text, baseHistory = messages) => {
     const userMsg = { role: "user", content: text };
     const withUser = [...baseHistory, userMsg];
     setMessages(withUser);
-    persistCurrent(withUser);
     setLoading(true);
     abortControllerRef.current = new AbortController();
 
     try {
-      const data = await sendMessage(text, sessionId, abortControllerRef.current.signal);
-      const withBot = [...withUser, { role: "assistant", content: data.response }];
+      const data = await sendMessage(
+        text,
+        sessionId,
+        abortControllerRef.current.signal
+      );
+      const withBot = [
+        ...withUser,
+        { role: "assistant", content: data.response },
+      ];
       setMessages(withBot);
-      persistCurrent(withBot);
-    } catch (err) {
-      if (err.name === "AbortError") {
-        // Request was aborted by user, we keep the user message
-        return;
+
+      // Refresh conversations list from DB for authenticated users
+      if (isAuthenticated) {
+        loadConversationsFromDB();
       }
+    } catch (err) {
+      if (err.name === "AbortError") return;
       const withErr = [
         ...withUser,
         { role: "assistant", content: `❌ خطأ: ${err.message}` },
       ];
       setMessages(withErr);
-      persistCurrent(withErr);
     } finally {
       setLoading(false);
       abortControllerRef.current = null;
@@ -137,19 +148,16 @@ export default function App() {
   const handleEditMessage = (index, newText) => {
     const truncated = messages.slice(0, index);
     setMessages(truncated);
-    persistCurrent(truncated);
     handleSend(newText, truncated);
   };
 
   const handleDeleteMessage = (index) => {
-    // Delete the user message and the immediate assistant response following it (if it exists)
     const updated = messages.filter((msg, i) => {
-      if (i === index) return false; // delete user message
-      if (i === index + 1 && msg.role === "assistant") return false; // delete bot answer
+      if (i === index) return false;
+      if (i === index + 1 && msg.role === "assistant") return false;
       return true;
     });
     setMessages(updated);
-    persistCurrent(updated);
   };
 
   const handleNewChat = async () => {
@@ -158,79 +166,154 @@ export default function App() {
     setMessages([WELCOME]);
   };
 
-  const handleSelectConversation = (convo) => {
+  const handleSelectConversation = async (convo) => {
     setSessionId(convo.id);
-    setMessages(convo.messages);
-  };
-
-  const handleDeleteConversation = (id) => {
-    setConversations((prev) => {
-      const updated = prev.filter((c) => c.id !== id);
-      saveConversations(updated);
-      return updated;
-    });
-    // If deleting the active conversation, start a new one
-    if (id === sessionId) {
-      setSessionId(uuidv4());
+    // Load messages from DB
+    try {
+      const data = await getConversationMessages(convo.id);
+      if (data.messages && data.messages.length > 0) {
+        setMessages(data.messages);
+      } else {
+        setMessages([WELCOME]);
+      }
+    } catch {
       setMessages([WELCOME]);
     }
   };
 
-  const handlePinConversation = (id) => {
-    setConversations((prev) => {
-      const updated = prev.map((c) =>
-        c.id === id ? { ...c, pinned: !c.pinned } : c
-      );
-      saveConversations(updated);
-      return updated;
-    });
+  const handleDeleteConversation = async (id) => {
+    try {
+      await apiDeleteConversation(id);
+      setConversations((prev) => prev.filter((c) => c.id !== id));
+      if (id === sessionId) {
+        setSessionId(uuidv4());
+        setMessages([WELCOME]);
+      }
+    } catch (err) {
+      console.error("Failed to delete conversation:", err);
+    }
   };
 
-  if (!hasStarted) {
-    return <LandingPage onStart={() => setHasStarted(true)} />;
+  const handlePinConversation = async (id) => {
+    try {
+      const result = await apiPinConversation(id);
+      setConversations((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, pinned: result.pinned } : c))
+      );
+    } catch (err) {
+      console.error("Failed to pin conversation:", err);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    setUser(null);
+    setConversations([]);
+    setAppState("landing");
+    setMessages([WELCOME]);
+    setSessionId(uuidv4());
+  };
+
+  // --- Routing ---
+
+  if (appState === "landing") {
+    return (
+      <LandingPage
+        onLogin={() => setAppState("login")}
+        onRegister={() => setAppState("register")}
+        onGuest={() => {
+          setSessionId(uuidv4());
+          setMessages([WELCOME]);
+          setAppState("guest");
+        }}
+      />
+    );
   }
 
+  if (appState === "login" || appState === "register") {
+    return (
+      <AuthPage
+        initialMode={appState}
+        onLoginSuccess={(userData) => {
+          setUser(userData);
+          setAppState("chat");
+        }}
+        onBack={() => setAppState("landing")}
+      />
+    );
+  }
+
+  // --- Chat view (guest or authenticated) ---
   return (
     <div className="app-layout">
-      <Sidebar
-        onNewChat={handleNewChat}
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((v) => !v)}
-        conversations={conversations}
-        activeSessionId={sessionId}
-        onSelectConversation={handleSelectConversation}
-        onDeleteConversation={handleDeleteConversation}
-        onPinConversation={handlePinConversation}
-      />
+      {/* Sidebar only for authenticated users */}
+      {isAuthenticated && (
+        <Sidebar
+          onNewChat={handleNewChat}
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed((v) => !v)}
+          conversations={conversations}
+          activeSessionId={sessionId}
+          onSelectConversation={handleSelectConversation}
+          onDeleteConversation={handleDeleteConversation}
+          onPinConversation={handlePinConversation}
+          user={user}
+          onLogout={handleLogout}
+        />
+      )}
 
       {/* Overlay for mobile */}
-      <div
-        className={`sidebar-overlay ${sidebarCollapsed ? 'hidden' : ''}`}
-        onClick={() => setSidebarCollapsed(true)}
-      />
+      {isAuthenticated && (
+        <div
+          className={`sidebar-overlay ${sidebarCollapsed ? "hidden" : ""}`}
+          onClick={() => setSidebarCollapsed(true)}
+        />
+      )}
 
       {/* Main chat */}
       <main className="chat-main">
         <div className="chat-header">
-          <button
-            className="mobile-menu-btn"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            title="Menu"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
-          <h1>Assistant Urbanisme <span className="law-badge">Loi 12-90</span></h1>
+          {isAuthenticated && (
+            <button
+              className="mobile-menu-btn"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title="Menu"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+          )}
+          <h1>Assistant Urbanisme</h1>
           <button
             className="theme-toggle-btn"
             onClick={() => setIsLightMode(!isLightMode)}
             title="Basculer le thème"
           >
-            {isLightMode ? '🌙' : '☀️'}
+            {isLightMode ? "🌙" : "☀️"}
           </button>
+
+          {isGuest && (
+            <button
+              className="theme-toggle-btn"
+              onClick={() => setAppState("login")}
+              title="Se connecter"
+              style={{ marginLeft: "0.5rem" }}
+            >
+              🔑
+            </button>
+          )}
         </div>
 
         <div className="messages-area">
@@ -245,9 +328,13 @@ export default function App() {
           ))}
           {loading && (
             <div className="bubble-wrap bubble-bot">
-              <div className="bot-avatar"><span>⚖️</span></div>
+              <div className="bot-avatar">
+                <span>⚖️</span>
+              </div>
               <div className="bubble bubble-bot-inner typing-indicator">
-                <span /><span /><span />
+                <span />
+                <span />
+                <span />
               </div>
             </div>
           )}
@@ -259,4 +346,3 @@ export default function App() {
     </div>
   );
 }
-

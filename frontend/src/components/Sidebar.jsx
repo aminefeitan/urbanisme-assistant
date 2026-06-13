@@ -1,17 +1,6 @@
 import React, { useState } from "react";
 import { uploadPDF } from "../services/api";
 
-function timeAgo(ts) {
-  const diff = Date.now() - ts;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "À l'instant";
-  if (mins < 60) return `${mins}min`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
-  const days = Math.floor(hrs / 24);
-  return `${days}j`;
-}
-
 export default function Sidebar({
   onNewChat,
   collapsed,
@@ -21,10 +10,40 @@ export default function Sidebar({
   onSelectConversation,
   onDeleteConversation,
   onPinConversation,
+  user,
+  onLogout,
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState(true); // Hidden by default as requested
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Helper to get initials
+  const getInitials = () => {
+    if (!user) return "U";
+    const f = user.first_name ? user.first_name.charAt(0).toUpperCase() : "";
+    const l = user.last_name ? user.last_name.charAt(0).toUpperCase() : "";
+    return f + l || "U";
+  };
+
+  // Helper to generate a random color based on name
+  const getAvatarColor = () => {
+    if (!user) return "linear-gradient(135deg, var(--accent) 0%, #d97706 100%)";
+    const name = user.first_name || user.name || "U";
+    const colors = [
+      "linear-gradient(135deg, #f43f5e 0%, #be123c 100%)", // Rose/Red
+      "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)", // Purple
+      "linear-gradient(135deg, #10b981 0%, #047857 100%)", // Emerald
+      "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)", // Blue
+      "linear-gradient(135deg, #f59e0b 0%, #b45309 100%)", // Amber
+      "linear-gradient(135deg, #06b6d4 0%, #0e7490 100%)", // Cyan
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -74,14 +93,12 @@ export default function Sidebar({
       key={convo.id}
       className={`history-item ${convo.id === activeSessionId ? "history-item--active" : ""} ${convo.pinned ? "history-item--pinned" : ""}`}
       onClick={() => onSelectConversation(convo)}
-      title={convo.title}
     >
       <span className="history-icon">
         {convo.pinned ? <PinIcon /> : <ChatIcon />}
       </span>
       <div className="history-info">
         <span className="history-title">{convo.title}</span>
-        <span className="history-time">{timeAgo(convo.updatedAt)}</span>
       </div>
       <div className="history-actions">
         <button
@@ -204,8 +221,61 @@ export default function Sidebar({
 
       {/* Footer */}
       <div className="sidebar-footer">
-        {!collapsed && <span>Assistant Urbanisme</span>}
+        {!collapsed && user ? (
+          <div className="user-profile-block">
+            <div className="user-avatar-circle" style={{ background: getAvatarColor() }}>
+              {getInitials()}
+            </div>
+            <div className="user-name">{user.first_name || user.name || "Utilisateur"}</div>
+            <button
+              className="user-logout-icon-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowLogoutModal(true);
+              }}
+              title="Déconnexion"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        ) : (
+          !collapsed && <span>Assistant Urbanisme</span>
+        )}
       </div>
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="logout-modal-overlay" onClick={() => setShowLogoutModal(false)}>
+          <div className="logout-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="logout-modal-title">Êtes-vous sûr de vouloir vous déconnecter ?</h2>
+            <p className="logout-modal-subtitle">
+              Se déconnecter d'Assistant Urbanisme en tant que<br />
+              <strong>{user.email || user.first_name || "cet utilisateur"}</strong> ?
+            </p>
+            <div className="logout-modal-actions">
+              <button
+                className="logout-modal-btn logout-modal-confirm"
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  onLogout();
+                }}
+              >
+                Se déconnecter
+              </button>
+              <button
+                className="logout-modal-btn logout-modal-cancel"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
