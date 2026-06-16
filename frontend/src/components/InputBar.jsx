@@ -79,12 +79,13 @@ export default function InputBar({ onSend, isLoading, onStop }) {
   ];
 
   return (
-    <div className="input-section">
-      <div className="suggestions">
+    <div className="p-3 sm:p-4 pb-4 border-t border-appBorder bg-surface shrink-0 input-section">
+      <div className="flex flex-wrap gap-1.5 mb-2.5 suggestions">
         {suggestions.map((s, i) => (
           <button
             key={i}
-            className="suggestion-chip"
+            className="px-3 py-1.5 bg-surface2 border border-appBorder text-muted rounded-[20px] text-[0.76rem] font-sans cursor-pointer transition-all duration-200 hover:not(:disabled):border-accent2 hover:not(:disabled):text-accent2 disabled:opacity-60 disabled:cursor-not-allowed text-right suggestion-chip"
+            dir="rtl"
             onClick={() => !isLoading && onSend(s)}
             disabled={isLoading || isRecording || isTranscribing}
           >
@@ -92,7 +93,7 @@ export default function InputBar({ onSend, isLoading, onStop }) {
           </button>
         ))}
       </div>
-      <div className="input-bar">
+      <div className="flex items-end gap-2 sm:gap-3 bg-surface2 border border-appBorder rounded-2xl p-1.5 sm:p-2 transition-all focus-within:border-accent2 focus-within:bg-surface input-bar">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -101,16 +102,17 @@ export default function InputBar({ onSend, isLoading, onStop }) {
           disabled={isLoading || isRecording || isTranscribing}
           rows={2}
           dir="auto"
+          className="flex-1 min-h-[44px] max-h-[150px] resize-none bg-transparent border-none text-[0.92rem] text-appText p-2 sm:p-3 focus:outline-none placeholder-muted disabled:opacity-60 font-sans leading-relaxed"
         />
         {(!isLoading && (!text.trim() || isRecording || isTranscribing)) ? (
           <button 
             onClick={toggleRecording} 
-            className={`send-btn mic-mode ${isRecording ? "recording" : ""}`}
+            className={`w-[40px] h-[40px] sm:w-[44px] sm:h-[44px] shrink-0 rounded-2xl border-none flex items-center justify-center cursor-pointer transition-all ${isRecording ? "bg-red-500 text-white animate-pulse" : "bg-surface text-muted hover:bg-surface2"}`}
             disabled={isTranscribing}
             title={isRecording ? "Arrêter l'enregistrement" : "Parler"}
           >
             {isTranscribing ? (
-              <div className="spinner mic-spinner"></div>
+              <div className="w-[18px] h-[18px] border-2 border-slate-400/30 border-t-slate-600 dark:border-t-slate-300 rounded-full animate-spin"></div>
             ) : (
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
@@ -121,13 +123,13 @@ export default function InputBar({ onSend, isLoading, onStop }) {
             )}
           </button>
         ) : (
-          <button onClick={handleAction} disabled={!isLoading && !text.trim()} className="send-btn">
+          <button onClick={handleAction} disabled={!isLoading && !text.trim()} className="w-[40px] h-[40px] sm:w-[44px] sm:h-[44px] shrink-0 rounded-2xl border-none flex items-center justify-center cursor-pointer transition-all bg-accent2 text-white hover:scale-105 shadow-sm hover:shadow-md disabled:bg-appBorder disabled:cursor-not-allowed send-btn">
             {isLoading ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="animate-pulse">
                 <rect x="6" y="6" width="12" height="12" rx="2" />
               </svg>
             ) : (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="translate-x-[1px] translate-y-[1px]">
                 <line x1="12" y1="20" x2="12" y2="4" />
                 <polyline points="6 10 12 4 18 10" />
               </svg>

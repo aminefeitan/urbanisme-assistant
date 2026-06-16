@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { registerUser, loginUser, verifyEmail, sendOtp } from '../services/api';
-import './AuthPage.css';
 
 export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack }) {
   const [mode, setMode] = useState(initialMode); // 'login' | 'register'
@@ -139,30 +138,34 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
   // Step 2: OTP Verification (after registration)
   if (step === 2) {
     return (
-      <div className="auth-container">
-        <div className="auth-card auth-card-otp">
-          <button className="auth-back-btn" onClick={() => setStep(1)} type="button">
+      <div className="fixed inset-0 flex items-center justify-center bg-appBg p-4 font-sans overflow-hidden z-[1000] scrollbar-none">
+        {/* Decorative background elements */}
+        <div className="absolute rounded-full blur-[80px] z-0 opacity-60 animate-[spinBlobs_20s_linear_infinite] -top-[20%] -right-[10%] w-[50vw] h-[50vw] bg-accent2/20"></div>
+        <div className="absolute rounded-full blur-[80px] z-0 opacity-60 animate-[spinBlobs_25s_linear_infinite_reverse] -bottom-[20%] -left-[10%] w-[45vw] h-[45vw] bg-accent/20"></div>
+        
+        <div className="bg-surface p-6 sm:p-8 rounded-[20px] shadow-lg w-full max-w-[420px] relative animate-[cardSlideUp_0.5s_ease-out] z-[2]">
+          <button className="inline-flex items-center gap-1 bg-transparent border-none text-muted cursor-pointer text-[0.9rem] font-medium p-0 mb-6 transition-colors hover:text-accent2" onClick={() => setStep(1)} type="button">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
             Retour
           </button>
 
-          <div className="auth-header">
-            <div className="auth-icon-wrap auth-icon-email">
+          <div className="text-center mb-4">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 bg-gradient-to-br from-amber-100 to-amber-200 text-amber-600">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </div>
-            <h2>Vérification Email</h2>
-            <p>Un code à 6 chiffres a été envoyé à<br /><strong>{email}</strong></p>
+            <h2 className="text-appText m-0 mb-1 text-[1.3rem] font-bold">Vérification Email</h2>
+            <p className="text-muted text-[0.92rem] m-0 leading-relaxed">Un code à 6 chiffres a été envoyé à<br /><strong className="text-appText">{email}</strong></p>
           </div>
 
-          {error && <div className="auth-error">{error}</div>}
+          {error && <div className="bg-red-500/10 text-red-500 px-4 py-3 rounded-lg mb-5 text-[0.88rem] text-center border border-red-500/20 animate-[shakeError_0.4s_ease]">{error}</div>}
 
-          <form onSubmit={handleVerifyEmail} className="auth-form">
-            <div className="otp-inputs">
+          <form onSubmit={handleVerifyEmail} className="flex flex-col">
+            <div className="flex gap-2 justify-center mb-6">
               {otp.map((digit, i) => (
                 <input
                   key={i}
@@ -172,7 +175,7 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
                   value={digit}
                   onChange={(e) => handleOtpChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="otp-input"
+                  className="w-[44px] h-[52px] sm:w-[52px] sm:h-[60px] text-center text-[1.5rem] font-bold border-2 border-appBorder rounded-xl bg-surface2 text-appText transition-all focus:outline-none focus:border-accent2 focus:bg-surface"
                   required
                   autoFocus={i === 0}
                 />
@@ -180,20 +183,20 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
             </div>
             <button
               type="submit"
-              className="auth-btn"
+              className="w-full p-3 bg-accent2 text-white border-none rounded-[10px] text-[1rem] font-semibold cursor-pointer transition-all mt-2 shadow-sm hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
               disabled={loading || otp.join('').length < 6}
             >
               {loading ? (
-                <span className="btn-loading"><span className="spinner"></span> Vérification...</span>
+                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Vérification...</span>
               ) : (
                 'Valider le code'
               )}
             </button>
-            <div className="resend-container">
+            <div className="text-center mt-5 text-[0.88rem] text-muted">
               {timer > 0 ? (
-                <span>Renvoyer le code dans <strong>{timer}s</strong></span>
+                <span>Renvoyer le code dans <strong className="text-appText">{timer}s</strong></span>
               ) : (
-                <button type="button" className="resend-btn" onClick={handleResendOtp} disabled={loading}>
+                <button type="button" className="bg-transparent border-none text-accent2 font-semibold p-0 text-[0.88rem] cursor-pointer transition-colors hover:text-accent hover:underline" onClick={handleResendOtp} disabled={loading}>
                   Renvoyer le code
                 </button>
               )}
@@ -204,12 +207,15 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
     );
   }
 
-  // Step 1: Login or Register Form
   return (
-    <div className="auth-container">
-      <div className="auth-card">
+    <div className="fixed inset-0 flex items-center justify-center bg-appBg p-4 font-sans overflow-hidden z-[1000] scrollbar-none">
+      {/* Decorative background elements */}
+      <div className="absolute rounded-full blur-[80px] z-0 opacity-60 animate-[spinBlobs_20s_linear_infinite] -top-[20%] -right-[10%] w-[50vw] h-[50vw] bg-accent2/20"></div>
+      <div className="absolute rounded-full blur-[80px] z-0 opacity-60 animate-[spinBlobs_25s_linear_infinite_reverse] -bottom-[20%] -left-[10%] w-[45vw] h-[45vw] bg-accent/20"></div>
+
+      <div className="bg-surface p-5 sm:p-6 rounded-[16px] sm:rounded-[20px] shadow-lg w-full max-w-[480px] relative animate-[cardSlideUp_0.5s_ease-out] z-[2]">
         {onBack && (
-          <button className="auth-back-btn" onClick={onBack} type="button">
+          <button className="inline-flex items-center gap-1 bg-transparent border-none text-muted cursor-pointer text-[0.9rem] font-medium p-0 mb-6 transition-colors hover:text-accent2" onClick={onBack} type="button">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
@@ -217,8 +223,8 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
           </button>
         )}
 
-        <div className="auth-header">
-          <div className={`auth-icon-wrap ${mode === 'login' ? 'auth-icon-login' : 'auth-icon-register'}`}>
+        <div className="text-center mb-3">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 ${mode === 'login' ? 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600' : 'bg-gradient-to-br from-green-100 to-green-200 text-green-600'}`}>
             {mode === 'login' ? (
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
@@ -234,21 +240,21 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
               </svg>
             )}
           </div>
-          <h2>{mode === 'login' ? 'Connexion' : 'Créer un compte'}</h2>
-          <p>{mode === 'login' ? 'Accédez à votre assistant juridique' : 'Inscrivez-vous pour commencer'}</p>
+          <h2 className="text-appText m-0 mb-1 text-[1.3rem] font-bold">{mode === 'login' ? 'Connexion' : 'Créer un compte'}</h2>
+          <p className="text-muted text-[0.92rem] m-0 leading-relaxed">{mode === 'login' ? 'Accédez à votre assistant juridique' : 'Inscrivez-vous pour commencer'}</p>
         </div>
 
         {/* Mode toggle tabs */}
-        <div className="auth-tabs">
+        <div className="flex gap-0 mb-3 bg-surface2 rounded-xl p-1">
           <button
-            className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
+            className={`flex-1 py-2 px-4 border-none rounded-[10px] text-[0.92rem] font-semibold cursor-pointer transition-all bg-transparent text-muted hover:text-appText ${mode === 'login' ? 'bg-surface text-appText shadow-sm hover:text-appText' : ''}`}
             onClick={() => setMode('login')}
             type="button"
           >
             Connexion
           </button>
           <button
-            className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
+            className={`flex-1 py-2 px-4 border-none rounded-[10px] text-[0.92rem] font-semibold cursor-pointer transition-all bg-transparent text-muted hover:text-appText ${mode === 'register' ? 'bg-surface text-appText shadow-sm hover:text-appText' : ''}`}
             onClick={() => setMode('register')}
             type="button"
           >
@@ -256,13 +262,13 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
           </button>
         </div>
 
-        {error && <div className="auth-error">{error}</div>}
+        {error && <div className="bg-red-500/10 text-red-500 px-4 py-3 rounded-lg mb-5 text-[0.88rem] text-center border border-red-500/20 animate-[shakeError_0.4s_ease]">{error}</div>}
 
         {mode === 'register' ? (
-          <form onSubmit={handleRegister} className="auth-form" id="register-form">
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="firstName">Prénom</label>
+          <form onSubmit={handleRegister} className="flex flex-col gap-0" id="register-form">
+            <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-3">
+              <div className="mb-2.5">
+                <label htmlFor="firstName" className="block mb-1 text-appText font-semibold text-[0.85rem]">Prénom</label>
                 <input
                   id="firstName"
                   type="text"
@@ -270,10 +276,11 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="Votre prénom"
                   required
+                  className="w-full py-2 px-3 border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
                 />
               </div>
-              <div className="form-group">
-                <label htmlFor="lastName">Nom</label>
+              <div className="mb-2.5">
+                <label htmlFor="lastName" className="block mb-1 text-appText font-semibold text-[0.85rem]">Nom</label>
                 <input
                   id="lastName"
                   type="text"
@@ -281,96 +288,103 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Votre nom"
                   required
+                  className="w-full py-2 px-3 border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
                 />
               </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="reg-email">Adresse Email</label>
+            <div className="mb-2.5">
+              <label htmlFor="reg-email" className="block mb-1 text-appText font-semibold text-[0.85rem]">Adresse Email</label>
               <input
                 id="reg-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="votre.email@exemple.com"
+                placeholder="Votre adresse e-mail"
                 required
+                className="w-full py-2 px-3 border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="reg-password">Mot de passe</label>
-              <div className="password-input-wrap">
-                <input
-                  id="reg-password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minimum 6 caractères"
-                  required
-                  minLength={6}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                >
-                  {showPassword ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                  )}
-                </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-3">
+              <div className="mb-2.5">
+                <label htmlFor="reg-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">Mot de passe</label>
+                <div className="relative">
+                  <input
+                    id="reg-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Votre mot de passe"
+                    required
+                    minLength={6}
+                    className="w-full py-2 px-3 pr-[44px] border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="mb-2.5">
+                <label htmlFor="reg-confirm-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">Confirmer</label>
+                <div className="relative">
+                  <input
+                    id="reg-confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirmez"
+                    required
+                    minLength={6}
+                    className="w-full py-2 px-3 pr-[44px] border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="reg-confirm-password">Confirmer le mot de passe</label>
-              <div className="password-input-wrap">
-                <input
-                  id="reg-confirm-password"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Retapez votre mot de passe"
-                  required
-                  minLength={6}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  tabIndex={-1}
-                >
-                  {showConfirmPassword ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                  )}
-                </button>
-              </div>
-            </div>
-            <button type="submit" className="auth-btn" disabled={loading || !firstName || !lastName || !email || !password || !confirmPassword}>
+            <button type="submit" className="w-full p-2.5 bg-accent2 text-white border-none rounded-[10px] text-[1rem] font-semibold cursor-pointer transition-all mt-1 shadow-sm hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" disabled={loading || !firstName || !lastName || !email || !password || !confirmPassword}>
               {loading ? (
-                <span className="btn-loading"><span className="spinner"></span> Inscription...</span>
+                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Inscription...</span>
               ) : (
                 "S'inscrire"
               )}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleLogin} className="auth-form" id="login-form">
-            <div className="form-group">
-              <label htmlFor="login-email">Adresse Email</label>
+          <form onSubmit={handleLogin} className="flex flex-col gap-0" id="login-form">
+            <div className="mb-2.5">
+              <label htmlFor="login-email" className="block mb-1 text-appText font-semibold text-[0.85rem]">Adresse Email</label>
               <input
                 id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="votre.email@exemple.com"
+                placeholder="Votre adresse e-mail"
                 required
+                className="w-full py-2 px-3 border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="login-password">Mot de passe</label>
-              <div className="password-input-wrap">
+            <div className="mb-2.5">
+              <label htmlFor="login-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">Mot de passe</label>
+              <div className="relative">
                 <input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
@@ -378,10 +392,11 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Votre mot de passe"
                   required
+                  className="w-full py-2 px-3 pr-[44px] border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
                 />
                 <button
                   type="button"
-                  className="password-toggle"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex={-1}
                 >
@@ -393,9 +408,9 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
                 </button>
               </div>
             </div>
-            <button type="submit" className="auth-btn" disabled={loading || !email || !password}>
+            <button type="submit" className="w-full p-2.5 bg-accent2 text-white border-none rounded-[10px] text-[1rem] font-semibold cursor-pointer transition-all mt-1 shadow-sm hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" disabled={loading || !email || !password}>
               {loading ? (
-                <span className="btn-loading"><span className="spinner"></span> Connexion...</span>
+                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Connexion...</span>
               ) : (
                 'Se connecter'
               )}
@@ -403,11 +418,11 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
           </form>
         )}
 
-        <div className="auth-switch">
+        <div className="text-center mt-3 pt-3 border-t border-appBorder">
           {mode === 'login' ? (
-            <p>Pas encore de compte ? <button type="button" className="switch-btn" onClick={switchMode}>S'inscrire</button></p>
+            <p className="text-muted text-[0.85rem] m-0">Pas encore de compte ? <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>S'inscrire</button></p>
           ) : (
-            <p>Vous avez déjà un compte ? <button type="button" className="switch-btn" onClick={switchMode}>Se connecter</button></p>
+            <p className="text-muted text-[0.85rem] m-0">Vous avez déjà un compte ? <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>Se connecter</button></p>
           )}
         </div>
       </div>

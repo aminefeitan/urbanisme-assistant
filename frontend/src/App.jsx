@@ -245,7 +245,7 @@ export default function App() {
 
   // --- Chat view (guest or authenticated) ---
   return (
-    <div className="app-layout">
+    <div className="flex h-screen w-full overflow-hidden bg-appBg text-appText font-sans app-layout">
       {/* Sidebar only for authenticated users */}
       {isAuthenticated && (
         <Sidebar
@@ -265,17 +265,17 @@ export default function App() {
       {/* Overlay for mobile */}
       {isAuthenticated && (
         <div
-          className={`sidebar-overlay ${sidebarCollapsed ? "hidden" : ""}`}
+          className={`fixed inset-0 bg-black/50 z-30 transition-opacity duration-300 md:hidden ${sidebarCollapsed ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"}`}
           onClick={() => setSidebarCollapsed(true)}
         />
       )}
 
       {/* Main chat */}
-      <main className="chat-main">
-        <div className="chat-header">
+      <main className="flex-1 flex flex-col min-w-0 h-full bg-surface relative z-0 chat-main">
+        <div className="h-[72px] shrink-0 px-4 sm:px-6 flex items-center border-b border-appBorder bg-surface/80 backdrop-blur-md sticky top-0 z-10 chat-header">
           {isAuthenticated && (
             <button
-              className="mobile-menu-btn"
+              className="mr-3 p-2 -ml-2 rounded-lg border-none bg-transparent text-muted hover:bg-surface2 cursor-pointer md:hidden transition-colors"
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               title="Menu"
             >
@@ -295,9 +295,9 @@ export default function App() {
               </svg>
             </button>
           )}
-          <h1>Assistant Urbanisme</h1>
+          <h1 className="text-[1.1rem] sm:text-[1.15rem] font-bold text-appText m-0 logo-title">Assistant Urbanisme</h1>
           <button
-            className="theme-toggle-btn"
+            className="ml-auto w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2"
             onClick={() => setIsLightMode(!isLightMode)}
             title="Basculer le thème"
           >
@@ -306,17 +306,16 @@ export default function App() {
 
           {isGuest && (
             <button
-              className="theme-toggle-btn"
+              className="ml-2 w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2"
               onClick={() => setAppState("login")}
               title="Se connecter"
-              style={{ marginLeft: "0.5rem" }}
             >
               🔑
             </button>
           )}
         </div>
 
-        <div className="messages-area">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 flex flex-col gap-6 scrollbar-thin scrollbar-thumb-muted">
           {messages.map((msg, i) => (
             <MessageBubble
               key={i}
@@ -327,18 +326,18 @@ export default function App() {
             />
           ))}
           {loading && (
-            <div className="bubble-wrap bubble-bot">
-              <div className="bot-avatar">
+            <div className="flex items-start gap-2.5 max-w-[780px] mr-auto animate-fadeUp">
+              <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 border-none bg-transparent">
                 <span>⚖️</span>
               </div>
-              <div className="bubble bubble-bot-inner typing-indicator">
-                <span />
-                <span />
-                <span />
+              <div className="relative p-3.5 sm:p-4 rounded-[16px] rounded-tl-sm bg-surface border border-appBorder shadow-sm flex items-center gap-1.5 min-h-[44px] typing-indicator">
+                <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out_0.2s]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out_0.4s]"></span>
               </div>
             </div>
           )}
-          <div ref={bottomRef} />
+          <div ref={bottomRef} className="h-4" />
         </div>
 
         <InputBar onSend={handleSend} isLoading={loading} onStop={handleStop} />
