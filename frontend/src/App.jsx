@@ -259,6 +259,8 @@ export default function App() {
           onPinConversation={handlePinConversation}
           user={user}
           onLogout={handleLogout}
+          isLightMode={isLightMode}
+          onToggleTheme={() => setIsLightMode(!isLightMode)}
         />
       )}
 
@@ -296,17 +298,9 @@ export default function App() {
             </button>
           )}
           <h1 className="text-[1.1rem] sm:text-[1.15rem] font-bold text-appText m-0 logo-title">Assistant Urbanisme</h1>
-          <button
-            className="ml-auto w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2"
-            onClick={() => setIsLightMode(!isLightMode)}
-            title="Basculer le thème"
-          >
-            {isLightMode ? "🌙" : "☀️"}
-          </button>
-
           {isGuest && (
             <button
-              className="ml-2 w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2"
+              className="ml-auto w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2"
               onClick={() => setAppState("login")}
               title="Se connecter"
             >

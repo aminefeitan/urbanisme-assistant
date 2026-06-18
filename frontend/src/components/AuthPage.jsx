@@ -420,7 +420,7 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
 
         <div className="text-center mt-3 pt-3 border-t border-appBorder">
           {mode === 'login' ? (
-            <p className="text-muted text-[0.85rem] m-0">Pas encore de compte ? <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>S'inscrire</button></p>
+            <p className="text-muted text-[0.85rem] m-0">Nouveau sur la plateforme ? <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>Créer un compte</button></p>
           ) : (
             <p className="text-muted text-[0.85rem] m-0">Vous avez déjà un compte ? <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>Se connecter</button></p>
           )}

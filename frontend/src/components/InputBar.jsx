@@ -98,15 +98,15 @@ export default function InputBar({ onSend, isLoading, onStop }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKey}
-          placeholder={isRecording ? "Écoute en cours..." : isTranscribing ? "Transcription..." : "كتب شكايتك هنا... / Écris ta plainte ici..."}
+          placeholder={isRecording ? "Écoute en cours..." : isTranscribing ? "Transcription..." : "Décrivez votre question d'urbanisme / اكتب استفسارك المتعلق بالتعمير..."}
           disabled={isLoading || isRecording || isTranscribing}
           rows={2}
           dir="auto"
           className="flex-1 min-h-[44px] max-h-[150px] resize-none bg-transparent border-none text-[0.92rem] text-appText p-2 sm:p-3 focus:outline-none placeholder-muted disabled:opacity-60 font-sans leading-relaxed"
         />
         {(!isLoading && (!text.trim() || isRecording || isTranscribing)) ? (
-          <button 
-            onClick={toggleRecording} 
+          <button
+            onClick={toggleRecording}
             className={`w-[40px] h-[40px] sm:w-[44px] sm:h-[44px] shrink-0 rounded-2xl border-none flex items-center justify-center cursor-pointer transition-all ${isRecording ? "bg-red-500 text-white animate-pulse" : "bg-surface text-muted hover:bg-surface2"}`}
             disabled={isTranscribing}
             title={isRecording ? "Arrêter l'enregistrement" : "Parler"}

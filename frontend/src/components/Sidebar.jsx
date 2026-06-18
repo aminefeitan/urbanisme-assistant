@@ -13,12 +13,15 @@ export default function Sidebar({
   onPinConversation,
   user,
   onLogout,
+  isLightMode,
+  onToggleTheme,
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showMiniMenu, setShowMiniMenu] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [showConvoPopover, setShowConvoPopover] = useState(false);
   const avatarRef = useRef(null);
   const convoIconRef = useRef(null);
@@ -72,10 +75,10 @@ export default function Sidebar({
     }
   };
 
-  const getMiniMenuStyle = () => {
+  const getProfileMenuStyle = () => {
     if (!avatarRef.current) return {};
     const rect = avatarRef.current.getBoundingClientRect();
-    return { top: rect.top - 48, left: rect.left };
+    return { bottom: window.innerHeight - rect.top + 8, left: rect.left };
   };
 
   const getConvoPopoverStyle = () => {
@@ -145,24 +148,29 @@ export default function Sidebar({
   );
 
   return (
-    <aside className={`flex flex-col h-full bg-surface border-r border-appBorder transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] z-40 relative backdrop-blur-xl sidebar ${collapsed ? "sidebar--collapsed" : "w-[var(--sidebar-w)]"}`}>
+    <aside className={`flex flex-col h-full bg-surface border-r border-appBorder transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] z-40 relative backdrop-blur-xl sidebar ${collapsed ? "w-[var(--sidebar-collapsed-w)]" : "w-[var(--sidebar-w)]"}`}>
 
       {/* Header */}
-      <div className="h-[72px] shrink-0 flex items-center justify-between px-4 border-b border-appBorder sidebar-header">
+      <div className="h-[72px] shrink-0 flex items-center justify-between px-4 border-b border-appBorder sidebar-header relative">
         <div
-          className={`flex items-center gap-3 cursor-pointer overflow-hidden transition-all duration-300 ${collapsed ? "w-0 opacity-0 ml-[-8px]" : "w-auto opacity-100"}`}
+          className={`flex items-center gap-3 cursor-pointer overflow-hidden transition-all duration-300 ${collapsed ? "w-0 opacity-0 pointer-events-none ml-[-8px]" : "w-auto opacity-100"}`}
           onClick={() => window.location.reload()}
           title="Actualiser"
         >
-          <img src="/logo_chatbot.png" alt="Agence Urbaine" className="w-[38px] h-[38px] object-contain shrink-0" />
+          <img src="/logo_chatbot.png" alt="Agence Urbaine" className="w-[64px] h-[64px] object-contain shrink-0" />
         </div>
         <button
-          className={`w-[40px] h-[40px] rounded-xl border-none bg-transparent flex items-center justify-center cursor-pointer transition-all duration-300 text-muted hover:bg-surface2 hover:text-appText ${collapsed ? "mx-auto" : ""}`}
+          className={`absolute rounded-xl border-none bg-transparent flex items-center justify-center cursor-pointer transition-all duration-300 text-muted hover:bg-surface2 hover:text-appText group ${collapsed ? "w-[60px] h-[60px] left-1/2 -translate-x-1/2" : "w-[40px] h-[40px] right-4"}`}
           onClick={onToggle}
           title={collapsed ? "Ouvrir le menu" : "Réduire le menu"}
         >
+          <img 
+            src="/logo_chatbot.png" 
+            alt="Agence Urbaine" 
+            className={`w-[58px] h-[58px] object-contain absolute transition-all duration-300 ${collapsed ? "opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-75" : "opacity-0 scale-50 pointer-events-none"}`} 
+          />
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}>
+            className={`transition-all duration-300 absolute ${collapsed ? "opacity-0 group-hover:opacity-100 rotate-180 scale-75 group-hover:scale-100" : "opacity-100 rotate-0 scale-100"}`}>
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
@@ -173,12 +181,12 @@ export default function Sidebar({
 
         {/* New Chat */}
         <button
-          className={`w-full flex items-center border border-appBorder bg-surface text-appText rounded-[var(--radius)] cursor-pointer transition-all duration-200 hover:bg-surface2 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-accent2 ${collapsed ? "h-[44px] justify-center p-0" : "h-[48px] px-4 gap-3"}`}
+          className={`w-full flex items-center border-none bg-surface text-appText rounded-[var(--radius)] cursor-pointer transition-all duration-200 hover:bg-surface2 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-accent2 ${collapsed ? "h-[44px] justify-center p-0" : "h-[48px] px-4 gap-3"}`}
           onClick={onNewChat}
         >
           <svg className="shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20h9" />
-            <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" />
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           {!collapsed && <span className="font-semibold text-[0.92rem]">Nouvelle conversation</span>}
         </button>
@@ -250,20 +258,20 @@ export default function Sidebar({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-appBorder bg-appBg/50 backdrop-blur-sm shrink-0">
+      <div className="p-4 border-t border-appBorder bg-appBg/50 backdrop-blur-sm shrink-0 relative">
         {user ? (
-          <div className={`flex items-center gap-3 w-full rounded-[var(--radius)] transition-all ${collapsed ? "justify-center p-0 bg-transparent cursor-pointer" : "p-2 bg-surface cursor-default user-profile-block"}`}>
+          <div 
+            className={`flex items-center gap-3 w-full rounded-[var(--radius)] transition-all cursor-pointer ${collapsed ? "justify-center p-0 bg-transparent" : "p-2 bg-surface hover:bg-surface2 user-profile-block"}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowProfileMenu(!showProfileMenu);
+            }}
+          >
             <div
               ref={avatarRef}
               className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-[0.95rem] shadow-sm shrink-0 transition-transform hover:scale-105"
-              style={{ background: getAvatarColor(), cursor: collapsed ? "pointer" : "default" }}
-              onClick={(e) => {
-                if (collapsed) {
-                  e.stopPropagation();
-                  setShowMiniMenu(!showMiniMenu);
-                }
-              }}
-              title={collapsed ? "Profil & Déconnexion" : ""}
+              style={{ background: getAvatarColor() }}
+              title={collapsed ? "Menu Profil" : ""}
             >
               {getInitials()}
             </div>
@@ -272,17 +280,6 @@ export default function Sidebar({
                 <div className="flex-1 min-w-0 text-[0.92rem] font-semibold text-appText truncate user-name">
                   {user.first_name || user.name || "Utilisateur"}
                 </div>
-                <button
-                  className="w-8 h-8 rounded-lg border-none bg-transparent flex items-center justify-center text-muted cursor-pointer transition-all hover:bg-red-500/10 hover:text-red-500 shrink-0 user-logout-icon-btn"
-                  onClick={(e) => { e.stopPropagation(); setShowLogoutModal(true); }}
-                  title="Déconnexion"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                  </svg>
-                </button>
               </>
             )}
           </div>
@@ -369,20 +366,126 @@ export default function Sidebar({
         document.body
       )}
 
-      {/* Mini Logout Popup */}
-      {collapsed && showMiniMenu && (
-        <div
-          className="fixed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg rounded-lg py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors z-[100] hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 text-slate-700 dark:text-slate-300 text-[0.88rem] font-medium"
-          style={getMiniMenuStyle()}
-          onClick={(e) => { e.stopPropagation(); setShowLogoutModal(true); setShowMiniMenu(false); }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          <span>Log out</span>
-        </div>
+      {/* Profile Menu Popover */}
+      {showProfileMenu && createPortal(
+        <>
+          <div className="fixed inset-0 z-[90]" onClick={() => setShowProfileMenu(false)} />
+          <div
+            className="fixed z-[100] bg-surface border border-appBorder shadow-2xl rounded-xl py-2 w-[260px] flex flex-col"
+            style={getProfileMenuStyle()}
+          >
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-appBorder flex items-center gap-3">
+               <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0" style={{ background: getAvatarColor() }}>
+                 {getInitials()}
+               </div>
+               <div className="flex flex-col min-w-0">
+                 <span className="font-semibold text-[0.95rem] text-appText truncate">{user?.first_name || user?.name || "Utilisateur"}</span>
+                 <span className="text-[0.7rem] text-muted break-all leading-tight mt-0.5">{user?.email}</span>
+               </div>
+            </div>
+
+            {/* Actions */}
+            <div className="py-2 flex flex-col">
+              <button 
+                className="flex items-center gap-3 px-4 py-2.5 text-[0.9rem] text-appText hover:bg-surface2 transition-colors border-none bg-transparent cursor-pointer text-left w-full" 
+                onClick={() => { setShowProfileMenu(false); setShowProfileModal(true); }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Profil
+              </button>
+              
+              <button 
+                className="flex items-center gap-3 px-4 py-2.5 text-[0.9rem] text-appText hover:bg-surface2 transition-colors border-none bg-transparent cursor-pointer text-left w-full" 
+                onClick={() => { onToggleTheme && onToggleTheme(); }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                Thème ({isLightMode ? "Clair" : "Sombre"})
+              </button>
+            </div>
+            
+            <div className="py-2 border-t border-appBorder">
+              <button 
+                className="flex items-center gap-3 px-4 py-2.5 text-[0.9rem] text-red-500 hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer text-left w-full" 
+                onClick={() => { setShowProfileMenu(false); setShowLogoutModal(true); }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Déconnexion
+              </button>
+            </div>
+          </div>
+        </>, 
+        document.body
+      )}
+
+      {/* Profile Edit Modal */}
+      {showProfileModal && createPortal(
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[2000] flex items-center justify-center p-4" onClick={() => setShowProfileModal(false)}>
+          <div className="bg-surface border border-appBorder rounded-2xl w-full max-w-[420px] p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h2 className="text-[1.1rem] font-medium text-appText mb-8">Edit profile</h2>
+            
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div 
+                  className="w-[110px] h-[110px] rounded-full flex items-center justify-center text-white font-medium text-[2.8rem] shadow-sm border-[3px] border-surface ring-1 ring-appBorder" 
+                  style={{ background: getAvatarColor() }}
+                >
+                  {getInitials()}
+                </div>
+                <button 
+                  className="absolute bottom-1 right-1 w-8 h-8 bg-surface border border-appBorder rounded-full flex items-center justify-center cursor-pointer shadow-md text-muted hover:text-appText transition-colors hover:bg-surface2"
+                  title="Changer la photo"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <div className="border border-appBorder rounded-xl px-3 py-1.5 focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-all bg-surface">
+                <label className="block text-[0.7rem] text-muted mb-0.5">Prénom</label>
+                <input type="text" defaultValue={user?.first_name || ""} className="w-full bg-transparent border-none p-0 text-[0.95rem] text-appText focus:outline-none focus:ring-0" />
+              </div>
+              <div className="border border-appBorder rounded-xl px-3 py-1.5 focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-all bg-surface">
+                <label className="block text-[0.7rem] text-muted mb-0.5">Nom</label>
+                <input type="text" defaultValue={user?.last_name || ""} className="w-full bg-transparent border-none p-0 text-[0.95rem] text-appText focus:outline-none focus:ring-0" />
+              </div>
+            </div>
+            
+            <p className="text-[0.75rem] text-muted text-center mt-3 mb-8">
+              Votre profil aide les gens à vous reconnaître dans les conversations.
+            </p>
+            
+            <div className="flex justify-end gap-3 mt-4">
+              <button 
+                className="px-5 py-2 rounded-full border border-appBorder bg-transparent text-appText hover:bg-surface2 cursor-pointer transition-colors font-medium text-[0.9rem]" 
+                onClick={() => setShowProfileModal(false)}
+              >
+                Annuler
+              </button>
+              <button 
+                className="px-5 py-2 rounded-full border-none bg-appText text-surface hover:opacity-90 cursor-pointer transition-opacity font-medium text-[0.9rem]" 
+                onClick={() => {
+                  // mock save
+                  setShowProfileModal(false);
+                }}
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>, 
+        document.body
       )}
 
       {/* Logout Modal */}

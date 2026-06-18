@@ -18,7 +18,7 @@
     --bot-bg: #0f172a;
     --radius: 16px;
     --sidebar-w: 280px;
-    --sidebar-collapsed-w: 68px;
+    --sidebar-collapsed-w: 60px;
   }
 
   [data-theme="light"] {
