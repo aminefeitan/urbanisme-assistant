@@ -9,11 +9,11 @@ function getAuthHeaders() {
   return headers;
 }
 
-export async function sendMessage(message, sessionId, signal) {
+export async function sendMessage(message, sessionId, signal, language = "ar") {
   const res = await fetch(`${BASE}/chat/`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ message, session_id: sessionId }),
+    body: JSON.stringify({ message, session_id: sessionId, language }),
     signal,
   });
   if (!res.ok) {

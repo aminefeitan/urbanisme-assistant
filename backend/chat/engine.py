@@ -158,7 +158,7 @@ def _count_articles() -> int:
         return 0
 
 
-def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int = None) -> str:
+def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int = None, language: str = "ar") -> str:
     """
     RAG pipeline:
     1. Check DB has articles
@@ -213,13 +213,17 @@ def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int =
     for msg in (history or [])[-6:]:
         messages.append({"role": msg["role"], "content": msg["content"]})
 
-    # Detect user language to reinforce prompt instruction
-    arabic_chars = sum(1 for c in query if '\u0600' <= c <= '\u06FF')
-    ratio = arabic_chars / max(len(query.replace(' ', '')), 1)
-    if ratio > 0.35:
-        lang_instruction = "[LANGUE DÉTECTÉE: ARABE / DARIJA — réponds EXCLUSIVEMENT en DARIJA MAROCAINE (الدارجة المغربية). N'UTILISE AUCUN MOT ÉGYPTIEN (pas de 'عشان', 'كده', 'ايه') !]"
+    # Determine language instruction based on explicit user choice
+    if language == "fr":
+        lang_instruction = "[LANGUE CHOISIE PAR L'UTILISATEUR: FRANÇAIS — réponds UNIQUEMENT en français, du début à la fin. Ne mélange AUCUN mot arabe dans ta réponse.]"
     else:
-        lang_instruction = "[LANGUE DÉTECTÉE: FRANÇAIS — réponds en français uniquement, du début à la fin]"
+        # Default: Arabic/Darija — use auto-detection for dialect
+        arabic_chars = sum(1 for c in query if '\u0600' <= c <= '\u06FF')
+        ratio = arabic_chars / max(len(query.replace(' ', '')), 1)
+        if ratio > 0.35:
+            lang_instruction = "[LANGUE DÉTECTÉE: ARABE / DARIJA — réponds EXCLUSIVEMENT en DARIJA MAROCAINE (الدارجة المغربية). N'UTILISE AUCUN MOT ÉGYPTIEN (pas de 'عشان', 'كده', 'ايه') !]"
+        else:
+            lang_instruction = "[LANGUE CHOISIE: ARABE — L'utilisateur a choisi l'arabe. Réponds en DARIJA MAROCAINE (الدارجة المغربية) par défaut.]"
 
     db_status = f"✅ {total_articles} articles chargés" if db_used else f"⚠️ {total_articles} articles disponibles mais aucun pertinent"
     user_content = (

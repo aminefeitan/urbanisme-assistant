@@ -1,12 +1,15 @@
 import React, { useState, useRef } from "react";
 import { transcribeAudio } from "../services/api";
+import translations from "../translations";
 
-export default function InputBar({ onSend, isLoading, onStop }) {
+export default function InputBar({ onSend, isLoading, onStop, language = "ar" }) {
   const [text, setText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  const t = translations[language] || translations.ar;
 
   const handleAction = () => {
     if (isLoading) {
@@ -55,7 +58,7 @@ export default function InputBar({ onSend, isLoading, onStop }) {
             }
           } catch (error) {
             console.error("Transcription error:", error);
-            alert("Erreur de transcription vocale.");
+            alert(t.transcriptionError);
           } finally {
             setIsTranscribing(false);
           }
@@ -65,27 +68,19 @@ export default function InputBar({ onSend, isLoading, onStop }) {
         setIsRecording(true);
       } catch (err) {
         console.error("Error accessing microphone:", err);
-        alert("Impossible d'accéder au microphone.");
+        alert(t.micError);
       }
     }
   };
 
-  // Quick suggestion chips
-  const suggestions = [
-    "عندي مشكل ديال البناء بلا رخصة",
-    "كيفاش نطلب رخصة البناء؟",
-    "الجار ديالي بنى على الحد",
-    "المنطقة ديالي قابلة للبناء؟",
-  ];
-
   return (
     <div className="p-3 sm:p-4 pb-4 border-t border-appBorder bg-surface shrink-0 input-section">
       <div className="flex flex-wrap gap-1.5 mb-2.5 suggestions">
-        {suggestions.map((s, i) => (
+        {t.suggestions.map((s, i) => (
           <button
             key={i}
-            className="px-3 py-1.5 bg-surface2 border border-appBorder text-muted rounded-[20px] text-[0.76rem] font-sans cursor-pointer transition-all duration-200 hover:not(:disabled):border-accent2 hover:not(:disabled):text-accent2 disabled:opacity-60 disabled:cursor-not-allowed text-right suggestion-chip"
-            dir="rtl"
+            className="px-3 py-1.5 bg-surface2 border border-appBorder text-muted rounded-[20px] text-[0.76rem] font-sans cursor-pointer transition-all duration-200 hover:not(:disabled):border-accent2 hover:not(:disabled):text-accent2 disabled:opacity-60 disabled:cursor-not-allowed suggestion-chip"
+            dir={language === "ar" ? "rtl" : "ltr"}
             onClick={() => !isLoading && onSend(s)}
             disabled={isLoading || isRecording || isTranscribing}
           >
@@ -98,10 +93,10 @@ export default function InputBar({ onSend, isLoading, onStop }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKey}
-          placeholder={isRecording ? "Écoute en cours..." : isTranscribing ? "Transcription..." : "Décrivez votre question d'urbanisme / اكتب استفسارك المتعلق بالتعمير..."}
+          placeholder={isRecording ? t.listening : isTranscribing ? t.transcribing : t.inputPlaceholder}
           disabled={isLoading || isRecording || isTranscribing}
           rows={2}
-          dir="auto"
+          dir={language === "ar" ? "rtl" : "ltr"}
           className="flex-1 min-h-[44px] max-h-[150px] resize-none bg-transparent border-none text-[0.92rem] text-appText p-2 sm:p-3 focus:outline-none placeholder-muted disabled:opacity-60 font-sans leading-relaxed"
         />
         {(!isLoading && (!text.trim() || isRecording || isTranscribing)) ? (
@@ -109,7 +104,7 @@ export default function InputBar({ onSend, isLoading, onStop }) {
             onClick={toggleRecording}
             className={`w-[40px] h-[40px] sm:w-[44px] sm:h-[44px] shrink-0 rounded-2xl border-none flex items-center justify-center cursor-pointer transition-all ${isRecording ? "bg-red-500 text-white animate-pulse" : "bg-surface text-muted hover:bg-surface2"}`}
             disabled={isTranscribing}
-            title={isRecording ? "Arrêter l'enregistrement" : "Parler"}
+            title={isRecording ? t.stopRecording : t.speak}
           >
             {isTranscribing ? (
               <div className="w-[18px] h-[18px] border-2 border-slate-400/30 border-t-slate-600 dark:border-t-slate-300 rounded-full animate-spin"></div>

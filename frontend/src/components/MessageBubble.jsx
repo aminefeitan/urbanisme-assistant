@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
-export default function MessageBubble({ role, content, onEdit, onDelete }) {
+export default function MessageBubble({ role, content, onEdit, onDelete, language = "ar" }) {
   const isUser = role === "user";
+  const isRTL = language === "ar";
   const [isEditing, setIsEditing] = useState(false);
   const [editVal, setEditVal] = useState(content);
   const [copied, setCopied] = useState(false);
@@ -32,8 +33,19 @@ export default function MessageBubble({ role, content, onEdit, onDelete }) {
     };
   }, []);
 
+  // In RTL (Arabic): bot messages align right, user messages align left
+  // In LTR (French): bot messages align left, user messages align right
+  const alignUser = isRTL ? "mr-auto flex-row-reverse" : "ml-auto flex-row-reverse";
+  const alignBot = isRTL ? "ml-auto" : "mr-auto";
+
+  const bubbleCorner = isUser
+    ? (isRTL ? "rounded-tl-sm" : "rounded-tr-sm")
+    : (isRTL ? "rounded-tr-sm" : "rounded-tl-sm");
+
+  const actionBarPos = isRTL ? "left-4" : "right-4";
+
   return (
-    <div className={`flex items-start gap-2.5 max-w-[780px] animate-fadeUp ${isUser ? "ml-auto flex-row-reverse" : "mr-auto"}`}>
+    <div className={`flex items-start gap-2.5 max-w-[780px] animate-fadeUp ${isUser ? alignUser : alignBot}`}>
       {!isUser && (
         <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 overflow-hidden bg-transparent border-none">
           <img
@@ -43,7 +55,7 @@ export default function MessageBubble({ role, content, onEdit, onDelete }) {
           />
         </div>
       )}
-      <div className={`relative p-3 sm:p-4 rounded-[var(--radius)] leading-[1.65] text-[0.91rem] break-words group ${isUser ? "bg-userBg text-appText rounded-tr-sm shadow-sm" : "bg-botBg border border-appBorder text-appText rounded-tl-sm shadow-sm"} [&_h1]:text-[0.92rem] [&_h1]:font-semibold [&_h1]:text-accent [&_h1]:my-3 [&_h2]:text-[0.92rem] [&_h2]:font-semibold [&_h2]:text-accent [&_h2]:my-3 [&_h3]:text-[0.92rem] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:my-3 [&_strong]:text-accent [&_ul]:pl-[25px] [&_ul]:my-1.5 [&_ol]:pl-[25px] [&_ol]:my-1.5 [&_li]:my-[3px] [&_p]:my-1 [&_p]:whitespace-pre-wrap [&_hr]:border-t [&_hr]:border-appBorder [&_hr]:my-2.5`} dir="auto">
+      <div className={`relative p-3 sm:p-4 rounded-[var(--radius)] leading-[1.65] text-[0.91rem] break-words group ${isUser ? `bg-userBg text-appText ${bubbleCorner} shadow-sm` : `bg-botBg border border-appBorder text-appText ${bubbleCorner} shadow-sm`} [&_h1]:text-[0.92rem] [&_h1]:font-semibold [&_h1]:text-accent [&_h1]:my-3 [&_h2]:text-[0.92rem] [&_h2]:font-semibold [&_h2]:text-accent [&_h2]:my-3 [&_h3]:text-[0.92rem] [&_h3]:font-semibold [&_h3]:text-accent [&_h3]:my-3 [&_strong]:text-accent [&_ul]:pl-[25px] [&_ul]:my-1.5 [&_ol]:pl-[25px] [&_ol]:my-1.5 [&_li]:my-[3px] [&_p]:my-1 [&_p]:whitespace-pre-wrap [&_hr]:border-t [&_hr]:border-appBorder [&_hr]:my-2.5`} dir="auto">
         {isUser ? (
           isEditing ? (
             <div className="flex flex-col gap-2">
@@ -67,7 +79,7 @@ export default function MessageBubble({ role, content, onEdit, onDelete }) {
         )}
 
         {isUser && !isEditing && (
-          <div className="flex gap-1.5 absolute -bottom-[18px] right-4 bg-surface border border-appBorder p-1 rounded-lg opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.1)] pointer-events-none group-hover:pointer-events-auto">
+          <div className={`flex gap-1.5 absolute -bottom-[18px] ${actionBarPos} bg-surface border border-appBorder p-1 rounded-lg opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.1)] pointer-events-none group-hover:pointer-events-auto`}>
             <button onClick={() => setIsEditing(true)} className="bg-surface2 border-none text-muted w-[26px] h-[26px] rounded-md flex items-center justify-center cursor-pointer transition-colors hover:bg-appBorder hover:text-appText" title="Modifier">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>

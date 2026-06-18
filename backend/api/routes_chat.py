@@ -15,6 +15,7 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
+    language: Optional[str] = "ar"
 
 
 class ChatResponse(BaseModel):
@@ -34,7 +35,7 @@ def send_message(req: ChatRequest, user: Optional[dict] = Depends(get_optional_u
         _upsert_conversation(session_id, user_id, req.message)
 
     try:
-        response = chat(req.message, session_id, history, user_id)
+        response = chat(req.message, session_id, history, user_id, req.language)
         return ChatResponse(response=response, session_id=session_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")

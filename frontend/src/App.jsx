@@ -14,20 +14,14 @@ import {
 } from "./services/api";
 import LandingPage from "./components/LandingPage";
 import AuthPage from "./components/AuthPage";
+import translations from "./translations";
 
-const WELCOME = {
-  role: "assistant",
-  content: `مرحباً! أنا مساعدك القانوني لشؤون التعمير بالمغرب 🏛️
-
-أنا متخصص في **القانون 12-90** المتعلق بالتعمير بالمغرب.
-
-**كيفاش نقدر نعاونك؟**
-- تحليل شكايتك ديال التعمير
-- شرح المقتضيات القانونية
-- اقتراح المسار الإداري الصحيح
-
-اكتب شكايتك أو سؤالك بالدارجة أو الفرنسية 👇`,
-};
+function getWelcome(lang) {
+  return {
+    role: "assistant",
+    content: translations[lang]?.welcome || translations.ar.welcome,
+  };
+}
 
 /** Extract a short title from the first user message */
 function extractTitle(messages) {
@@ -42,7 +36,10 @@ export default function App() {
   const [appState, setAppState] = useState("landing");
   const [user, setUser] = useState(null);
   const [sessionId, setSessionId] = useState(uuidv4());
-  const [messages, setMessages] = useState([WELCOME]);
+  const [language, setLanguage] = useState(
+    () => localStorage.getItem("appLanguage") || "ar"
+  );
+  const [messages, setMessages] = useState([getWelcome(language)]);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
@@ -56,6 +53,26 @@ export default function App() {
 
   const isGuest = appState === "guest";
   const isAuthenticated = appState === "chat" && user !== null;
+  const t = translations[language] || translations.ar;
+  const isRTL = language === "ar";
+
+  // --- Language ---
+  useEffect(() => {
+    localStorage.setItem("appLanguage", language);
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = language === "ar" ? "ar" : "fr";
+  }, [language]);
+
+  const handleLanguageChange = (newLang) => {
+    setLanguage(newLang);
+    // Update welcome message if it's the only message (fresh chat)
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].role === "assistant") {
+        return [getWelcome(newLang)];
+      }
+      return prev;
+    });
+  };
 
   // --- Theme ---
   useEffect(() => {
@@ -114,7 +131,8 @@ export default function App() {
       const data = await sendMessage(
         text,
         sessionId,
-        abortControllerRef.current.signal
+        abortControllerRef.current.signal,
+        language
       );
       const withBot = [
         ...withUser,
@@ -130,7 +148,7 @@ export default function App() {
       if (err.name === "AbortError") return;
       const withErr = [
         ...withUser,
-        { role: "assistant", content: `❌ خطأ: ${err.message}` },
+        { role: "assistant", content: `❌ ${language === "ar" ? "خطأ" : "Erreur"}: ${err.message}` },
       ];
       setMessages(withErr);
     } finally {
@@ -163,7 +181,7 @@ export default function App() {
   const handleNewChat = async () => {
     await clearHistory(sessionId).catch(() => { });
     setSessionId(uuidv4());
-    setMessages([WELCOME]);
+    setMessages([getWelcome(language)]);
   };
 
   const handleSelectConversation = async (convo) => {
@@ -174,10 +192,10 @@ export default function App() {
       if (data.messages && data.messages.length > 0) {
         setMessages(data.messages);
       } else {
-        setMessages([WELCOME]);
+        setMessages([getWelcome(language)]);
       }
     } catch {
-      setMessages([WELCOME]);
+      setMessages([getWelcome(language)]);
     }
   };
 
@@ -187,7 +205,7 @@ export default function App() {
       setConversations((prev) => prev.filter((c) => c.id !== id));
       if (id === sessionId) {
         setSessionId(uuidv4());
-        setMessages([WELCOME]);
+        setMessages([getWelcome(language)]);
       }
     } catch (err) {
       console.error("Failed to delete conversation:", err);
@@ -210,7 +228,7 @@ export default function App() {
     setUser(null);
     setConversations([]);
     setAppState("landing");
-    setMessages([WELCOME]);
+    setMessages([getWelcome(language)]);
     setSessionId(uuidv4());
   };
 
@@ -223,9 +241,11 @@ export default function App() {
         onRegister={() => setAppState("register")}
         onGuest={() => {
           setSessionId(uuidv4());
-          setMessages([WELCOME]);
+          setMessages([getWelcome(language)]);
           setAppState("guest");
         }}
+        language={language}
+        onLanguageChange={handleLanguageChange}
       />
     );
   }
@@ -239,13 +259,15 @@ export default function App() {
           setAppState("chat");
         }}
         onBack={() => setAppState("landing")}
+        language={language}
+        onLanguageChange={handleLanguageChange}
       />
     );
   }
 
   // --- Chat view (guest or authenticated) ---
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-appBg text-appText font-sans app-layout">
+    <div className="flex h-screen w-full overflow-hidden bg-appBg text-appText font-sans app-layout" dir={isRTL ? "rtl" : "ltr"}>
       {/* Sidebar only for authenticated users */}
       {isAuthenticated && (
         <Sidebar
@@ -261,6 +283,8 @@ export default function App() {
           onLogout={handleLogout}
           isLightMode={isLightMode}
           onToggleTheme={() => setIsLightMode(!isLightMode)}
+          language={language}
+          onLanguageChange={handleLanguageChange}
         />
       )}
 
@@ -277,9 +301,9 @@ export default function App() {
         <div className="h-[72px] shrink-0 px-4 sm:px-6 flex items-center border-b border-appBorder bg-surface/80 backdrop-blur-md sticky top-0 z-10 chat-header">
           {isAuthenticated && (
             <button
-              className="mr-3 p-2 -ml-2 rounded-lg border-none bg-transparent text-muted hover:bg-surface2 cursor-pointer md:hidden transition-colors"
+              className={`${isRTL ? "ml-3 -mr-2" : "mr-3 -ml-2"} p-2 rounded-lg border-none bg-transparent text-muted hover:bg-surface2 cursor-pointer md:hidden transition-colors`}
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              title="Menu"
+              title={t.menu}
             >
               <svg
                 width="24"
@@ -297,12 +321,12 @@ export default function App() {
               </svg>
             </button>
           )}
-          <h1 className="text-[1.1rem] sm:text-[1.15rem] font-bold text-appText m-0 logo-title">Assistant Urbanisme</h1>
+          <h1 className="text-[1.1rem] sm:text-[1.15rem] font-bold text-appText m-0 logo-title">{t.headerTitle}</h1>
           {isGuest && (
             <button
-              className="ml-auto w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2"
+              className={`${isRTL ? "mr-auto" : "ml-auto"} w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2`}
               onClick={() => setAppState("login")}
-              title="Se connecter"
+              title={t.loginButton}
             >
               🔑
             </button>
@@ -317,14 +341,15 @@ export default function App() {
               content={msg.content}
               onEdit={(newText) => handleEditMessage(i, newText)}
               onDelete={() => handleDeleteMessage(i)}
+              language={language}
             />
           ))}
           {loading && (
-            <div className="flex items-start gap-2.5 max-w-[780px] mr-auto animate-fadeUp">
+            <div className={`flex items-start gap-2.5 max-w-[780px] ${isRTL ? "ml-auto" : "mr-auto"} animate-fadeUp`}>
               <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 border-none bg-transparent">
                 <span>⚖️</span>
               </div>
-              <div className="relative p-3.5 sm:p-4 rounded-[16px] rounded-tl-sm bg-surface border border-appBorder shadow-sm flex items-center gap-1.5 min-h-[44px] typing-indicator">
+              <div className={`relative p-3.5 sm:p-4 ${isRTL ? "rounded-[16px] rounded-tr-sm" : "rounded-[16px] rounded-tl-sm"} bg-surface border border-appBorder shadow-sm flex items-center gap-1.5 min-h-[44px] typing-indicator`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out]"></span>
                 <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out_0.2s]"></span>
                 <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out_0.4s]"></span>
@@ -334,7 +359,7 @@ export default function App() {
           <div ref={bottomRef} className="h-4" />
         </div>
 
-        <InputBar onSend={handleSend} isLoading={loading} onStop={handleStop} />
+        <InputBar onSend={handleSend} isLoading={loading} onStop={handleStop} language={language} />
       </main>
     </div>
   );

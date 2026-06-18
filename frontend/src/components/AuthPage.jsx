@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { registerUser, loginUser, verifyEmail, sendOtp } from '../services/api';
+import translations from '../translations';
 
-export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack }) {
+export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack, language = "ar", onLanguageChange }) {
   const [mode, setMode] = useState(initialMode); // 'login' | 'register'
   const [step, setStep] = useState(1); // 1: form, 2: OTP verification (register only)
 
@@ -21,6 +22,9 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const t = translations[language] || translations.ar;
+  const isRTL = language === "ar";
 
   useEffect(() => {
     let interval;
@@ -42,11 +46,11 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
   const handleRegister = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError(t.authPasswordMismatch);
       return;
     }
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères.');
+      setError(t.authPasswordTooShort);
       return;
     }
 
@@ -57,7 +61,7 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
       setStep(2);
       setTimer(60);
     } catch (err) {
-      setError(err.message || "Erreur lors de l'inscription.");
+      setError(err.message || t.authPasswordMismatch);
     } finally {
       setLoading(false);
     }
@@ -138,17 +142,17 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
   // Step 2: OTP Verification (after registration)
   if (step === 2) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-appBg p-4 font-sans overflow-hidden z-[1000] scrollbar-none">
+      <div className="fixed inset-0 flex items-center justify-center bg-appBg p-4 font-sans overflow-hidden z-[1000] scrollbar-none" dir={isRTL ? "rtl" : "ltr"}>
         {/* Decorative background elements */}
         <div className="absolute rounded-full blur-[80px] z-0 opacity-60 animate-[spinBlobs_20s_linear_infinite] -top-[20%] -right-[10%] w-[50vw] h-[50vw] bg-accent2/20"></div>
         <div className="absolute rounded-full blur-[80px] z-0 opacity-60 animate-[spinBlobs_25s_linear_infinite_reverse] -bottom-[20%] -left-[10%] w-[45vw] h-[45vw] bg-accent/20"></div>
         
         <div className="bg-surface p-6 sm:p-8 rounded-[20px] shadow-lg w-full max-w-[420px] relative animate-[cardSlideUp_0.5s_ease-out] z-[2]">
           <button className="inline-flex items-center gap-1 bg-transparent border-none text-muted cursor-pointer text-[0.9rem] font-medium p-0 mb-6 transition-colors hover:text-accent2" onClick={() => setStep(1)} type="button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isRTL ? "rotate(180deg)" : undefined }}>
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
-            Retour
+            {t.otpBack}
           </button>
 
           <div className="text-center mb-4">
@@ -158,14 +162,14 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </div>
-            <h2 className="text-appText m-0 mb-1 text-[1.3rem] font-bold">Vérification Email</h2>
-            <p className="text-muted text-[0.92rem] m-0 leading-relaxed">Un code à 6 chiffres a été envoyé à<br /><strong className="text-appText">{email}</strong></p>
+            <h2 className="text-appText m-0 mb-1 text-[1.3rem] font-bold">{t.otpTitle}</h2>
+            <p className="text-muted text-[0.92rem] m-0 leading-relaxed">{t.otpSubtitle}<br /><strong className="text-appText">{email}</strong></p>
           </div>
 
           {error && <div className="bg-red-500/10 text-red-500 px-4 py-3 rounded-lg mb-5 text-[0.88rem] text-center border border-red-500/20 animate-[shakeError_0.4s_ease]">{error}</div>}
 
           <form onSubmit={handleVerifyEmail} className="flex flex-col">
-            <div className="flex gap-2 justify-center mb-6">
+            <div className="flex gap-2 justify-center mb-6" dir="ltr">
               {otp.map((digit, i) => (
                 <input
                   key={i}
@@ -187,17 +191,17 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
               disabled={loading || otp.join('').length < 6}
             >
               {loading ? (
-                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Vérification...</span>
+                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> {t.otpVerifying}</span>
               ) : (
-                'Valider le code'
+                t.otpValidate
               )}
             </button>
             <div className="text-center mt-5 text-[0.88rem] text-muted">
               {timer > 0 ? (
-                <span>Renvoyer le code dans <strong className="text-appText">{timer}s</strong></span>
+                <span>{t.otpResendIn} <strong className="text-appText">{timer}s</strong></span>
               ) : (
                 <button type="button" className="bg-transparent border-none text-accent2 font-semibold p-0 text-[0.88rem] cursor-pointer transition-colors hover:text-accent hover:underline" onClick={handleResendOtp} disabled={loading}>
-                  Renvoyer le code
+                  {t.otpResend}
                 </button>
               )}
             </div>
@@ -208,20 +212,29 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-appBg p-4 font-sans overflow-hidden z-[1000] scrollbar-none">
+    <div className="fixed inset-0 flex items-center justify-center bg-appBg p-4 font-sans overflow-hidden z-[1000] scrollbar-none" dir={isRTL ? "rtl" : "ltr"}>
       {/* Decorative background elements */}
       <div className="absolute rounded-full blur-[80px] z-0 opacity-60 animate-[spinBlobs_20s_linear_infinite] -top-[20%] -right-[10%] w-[50vw] h-[50vw] bg-accent2/20"></div>
       <div className="absolute rounded-full blur-[80px] z-0 opacity-60 animate-[spinBlobs_25s_linear_infinite_reverse] -bottom-[20%] -left-[10%] w-[45vw] h-[45vw] bg-accent/20"></div>
 
       <div className="bg-surface p-5 sm:p-6 rounded-[16px] sm:rounded-[20px] shadow-lg w-full max-w-[480px] relative animate-[cardSlideUp_0.5s_ease-out] z-[2]">
-        {onBack && (
-          <button className="inline-flex items-center gap-1 bg-transparent border-none text-muted cursor-pointer text-[0.9rem] font-medium p-0 mb-6 transition-colors hover:text-accent2" onClick={onBack} type="button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Accueil
+        <div className="flex items-center justify-between mb-6">
+          {onBack && (
+            <button className="inline-flex items-center gap-1 bg-transparent border-none text-muted cursor-pointer text-[0.9rem] font-medium p-0 transition-colors hover:text-accent2" onClick={onBack} type="button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isRTL ? "rotate(180deg)" : undefined }}>
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              {t.authBack}
+            </button>
+          )}
+          {/* Language toggle */}
+          <button
+            className="px-3 py-1.5 rounded-full text-[0.8rem] font-medium transition-all duration-300 border border-appBorder text-muted hover:border-accent2 hover:text-accent2"
+            onClick={() => onLanguageChange && onLanguageChange(language === "ar" ? "fr" : "ar")}
+          >
+            {language === "ar" ? "FR" : "عربي"}
           </button>
-        )}
+        </div>
 
         <div className="text-center mb-3">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 ${mode === 'login' ? 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600' : 'bg-gradient-to-br from-green-100 to-green-200 text-green-600'}`}>
@@ -240,8 +253,8 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
               </svg>
             )}
           </div>
-          <h2 className="text-appText m-0 mb-1 text-[1.3rem] font-bold">{mode === 'login' ? 'Connexion' : 'Créer un compte'}</h2>
-          <p className="text-muted text-[0.92rem] m-0 leading-relaxed">{mode === 'login' ? 'Accédez à votre assistant juridique' : 'Inscrivez-vous pour commencer'}</p>
+          <h2 className="text-appText m-0 mb-1 text-[1.3rem] font-bold">{mode === 'login' ? t.authLogin : t.authRegister}</h2>
+          <p className="text-muted text-[0.92rem] m-0 leading-relaxed">{mode === 'login' ? t.authLoginSubtitle : t.authRegisterSubtitle}</p>
         </div>
 
         {/* Mode toggle tabs */}
@@ -251,14 +264,14 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
             onClick={() => setMode('login')}
             type="button"
           >
-            Connexion
+            {t.authLoginTab}
           </button>
           <button
             className={`flex-1 py-2 px-4 border-none rounded-[10px] text-[0.92rem] font-semibold cursor-pointer transition-all bg-transparent text-muted hover:text-appText ${mode === 'register' ? 'bg-surface text-appText shadow-sm hover:text-appText' : ''}`}
             onClick={() => setMode('register')}
             type="button"
           >
-            Inscription
+            {t.authRegisterTab}
           </button>
         </div>
 
@@ -268,59 +281,61 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
           <form onSubmit={handleRegister} className="flex flex-col gap-0" id="register-form">
             <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-3">
               <div className="mb-2.5">
-                <label htmlFor="firstName" className="block mb-1 text-appText font-semibold text-[0.85rem]">Prénom</label>
+                <label htmlFor="firstName" className="block mb-1 text-appText font-semibold text-[0.85rem]">{t.authFirstName}</label>
                 <input
                   id="firstName"
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Votre prénom"
+                  placeholder={t.authFirstNamePlaceholder}
                   required
                   className="w-full py-2 px-3 border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
                 />
               </div>
               <div className="mb-2.5">
-                <label htmlFor="lastName" className="block mb-1 text-appText font-semibold text-[0.85rem]">Nom</label>
+                <label htmlFor="lastName" className="block mb-1 text-appText font-semibold text-[0.85rem]">{t.authLastName}</label>
                 <input
                   id="lastName"
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Votre nom"
+                  placeholder={t.authLastNamePlaceholder}
                   required
                   className="w-full py-2 px-3 border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
                 />
               </div>
             </div>
             <div className="mb-2.5">
-              <label htmlFor="reg-email" className="block mb-1 text-appText font-semibold text-[0.85rem]">Adresse Email</label>
+              <label htmlFor="reg-email" className="block mb-1 text-appText font-semibold text-[0.85rem]">{t.authEmail}</label>
               <input
                 id="reg-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Votre adresse e-mail"
+                placeholder={t.authEmailPlaceholder}
                 required
+                dir={isRTL ? "rtl" : "ltr"}
                 className="w-full py-2 px-3 border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-3">
               <div className="mb-2.5">
-                <label htmlFor="reg-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">Mot de passe</label>
+                <label htmlFor="reg-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">{t.authPassword}</label>
                 <div className="relative">
                   <input
                     id="reg-password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Votre mot de passe"
+                    placeholder={t.authPasswordPlaceholder}
                     required
                     minLength={6}
-                    className="w-full py-2 px-3 pr-[44px] border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
+                    dir={isRTL ? "rtl" : "ltr"}
+                    className={`w-full py-2 px-3 ${isRTL ? "pl-[44px]" : "pr-[44px]"} border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border`}
                   />
                   <button
                     type="button"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors"
+                    className={`absolute ${isRTL ? "left-2.5" : "right-2.5"} top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors`}
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
                   >
@@ -333,21 +348,22 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
                 </div>
               </div>
               <div className="mb-2.5">
-                <label htmlFor="reg-confirm-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">Confirmer</label>
+                <label htmlFor="reg-confirm-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">{t.authConfirmPassword}</label>
                 <div className="relative">
                   <input
                     id="reg-confirm-password"
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirmez"
+                    placeholder={t.authConfirmPlaceholder}
                     required
                     minLength={6}
-                    className="w-full py-2 px-3 pr-[44px] border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
+                    dir={isRTL ? "rtl" : "ltr"}
+                    className={`w-full py-2 px-3 ${isRTL ? "pl-[44px]" : "pr-[44px]"} border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border`}
                   />
                   <button
                     type="button"
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors"
+                    className={`absolute ${isRTL ? "left-2.5" : "right-2.5"} top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors`}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     tabIndex={-1}
                   >
@@ -362,41 +378,43 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
             </div>
             <button type="submit" className="w-full p-2.5 bg-accent2 text-white border-none rounded-[10px] text-[1rem] font-semibold cursor-pointer transition-all mt-1 shadow-sm hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" disabled={loading || !firstName || !lastName || !email || !password || !confirmPassword}>
               {loading ? (
-                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Inscription...</span>
+                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> {t.authRegistering}</span>
               ) : (
-                "S'inscrire"
+                t.authRegisterButton
               )}
             </button>
           </form>
         ) : (
           <form onSubmit={handleLogin} className="flex flex-col gap-0" id="login-form">
             <div className="mb-2.5">
-              <label htmlFor="login-email" className="block mb-1 text-appText font-semibold text-[0.85rem]">Adresse Email</label>
+              <label htmlFor="login-email" className="block mb-1 text-appText font-semibold text-[0.85rem]">{t.authEmail}</label>
               <input
                 id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Votre adresse e-mail"
+                placeholder={t.authEmailPlaceholder}
                 required
+                dir={isRTL ? "rtl" : "ltr"}
                 className="w-full py-2 px-3 border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
               />
             </div>
             <div className="mb-2.5">
-              <label htmlFor="login-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">Mot de passe</label>
+              <label htmlFor="login-password" className="block mb-1 text-appText font-semibold text-[0.85rem]">{t.authPassword}</label>
               <div className="relative">
                 <input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Votre mot de passe"
+                  placeholder={t.authPasswordPlaceholder}
                   required
-                  className="w-full py-2 px-3 pr-[44px] border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border"
+                  dir={isRTL ? "rtl" : "ltr"}
+                  className={`w-full py-2 px-3 ${isRTL ? "pl-[44px]" : "pr-[44px]"} border-[1.5px] border-appBorder rounded-[10px] text-[0.95rem] bg-surface2 text-appText placeholder-muted transition-all focus:outline-none focus:border-accent2 focus:bg-surface box-border`}
                 />
                 <button
                   type="button"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors"
+                  className={`absolute ${isRTL ? "left-2.5" : "right-2.5"} top-1/2 -translate-y-1/2 bg-transparent border-none text-slate-400 p-1 flex items-center justify-center cursor-pointer hover:text-slate-600 dark:hover:text-slate-500 transition-colors`}
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex={-1}
                 >
@@ -410,9 +428,9 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
             </div>
             <button type="submit" className="w-full p-2.5 bg-accent2 text-white border-none rounded-[10px] text-[1rem] font-semibold cursor-pointer transition-all mt-1 shadow-sm hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" disabled={loading || !email || !password}>
               {loading ? (
-                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Connexion...</span>
+                <span className="inline-flex items-center gap-2"><span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></span> {t.authLoggingIn}</span>
               ) : (
-                'Se connecter'
+                t.authLoginButton
               )}
             </button>
           </form>
@@ -420,9 +438,9 @@ export default function AuthPage({ initialMode = 'login', onLoginSuccess, onBack
 
         <div className="text-center mt-3 pt-3 border-t border-appBorder">
           {mode === 'login' ? (
-            <p className="text-muted text-[0.85rem] m-0">Nouveau sur la plateforme ? <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>Créer un compte</button></p>
+            <p className="text-muted text-[0.85rem] m-0">{t.authNewUser} <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>{t.authCreateAccount}</button></p>
           ) : (
-            <p className="text-muted text-[0.85rem] m-0">Vous avez déjà un compte ? <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>Se connecter</button></p>
+            <p className="text-muted text-[0.85rem] m-0">{t.authHaveAccount} <button type="button" className="bg-transparent border-none text-accent2 font-semibold cursor-pointer text-[0.85rem] p-0 transition-colors hover:text-accent hover:underline" onClick={switchMode}>{t.authSignIn}</button></p>
           )}
         </div>
       </div>
