@@ -15,6 +15,7 @@ import {
 import LandingPage from "./components/LandingPage";
 import AuthPage from "./components/AuthPage";
 import translations from "./translations";
+import SettingsPage from "./components/SettingsPage";
 
 function getWelcome(lang) {
   return {
@@ -34,6 +35,7 @@ function extractTitle(messages) {
 export default function App() {
   // appState: 'landing' | 'login' | 'register' | 'guest' | 'chat'
   const [appState, setAppState] = useState("landing");
+  const [showSettings, setShowSettings] = useState(false);
   const [user, setUser] = useState(null);
   const [sessionId, setSessionId] = useState(uuidv4());
   const [language, setLanguage] = useState(
@@ -270,12 +272,12 @@ export default function App() {
       {/* Sidebar only for authenticated users */}
       {isAuthenticated && (
         <Sidebar
-          onNewChat={handleNewChat}
+          onNewChat={() => { setShowSettings(false); handleNewChat(); }}
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed((v) => !v)}
           conversations={conversations}
           activeSessionId={sessionId}
-          onSelectConversation={handleSelectConversation}
+          onSelectConversation={(convo) => { setShowSettings(false); handleSelectConversation(convo); }}
           onDeleteConversation={handleDeleteConversation}
           onPinConversation={handlePinConversation}
           user={user}
@@ -284,6 +286,7 @@ export default function App() {
           onToggleTheme={() => setIsLightMode(!isLightMode)}
           language={language}
           onLanguageChange={handleLanguageChange}
+          onOpenSettings={() => setShowSettings(true)}
         />
       )}
 
@@ -295,71 +298,81 @@ export default function App() {
         />
       )}
 
-      {/* Main chat */}
-      <main className="flex-1 flex flex-col min-w-0 h-full bg-surface relative z-0 chat-main">
-        <div className="h-[72px] shrink-0 px-4 sm:px-6 flex items-center border-b border-appBorder bg-surface/80 backdrop-blur-md sticky top-0 z-10 chat-header">
-          {isAuthenticated && (
-            <button
-              className={`${isRTL ? "ml-3 -mr-2" : "mr-3 -ml-2"} p-2 rounded-lg border-none bg-transparent text-muted hover:bg-surface2 cursor-pointer md:hidden transition-colors`}
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              title={t.menu}
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+      {/* Main content: Settings or Chat */}
+      {showSettings ? (
+        <SettingsPage
+          isLightMode={isLightMode}
+          onToggleTheme={() => setIsLightMode(!isLightMode)}
+          language={language}
+          onLanguageChange={handleLanguageChange}
+          onBack={() => setShowSettings(false)}
+        />
+      ) : (
+        <main className="flex-1 flex flex-col min-w-0 h-full bg-surface relative z-0 chat-main">
+          <div className="h-[72px] shrink-0 px-4 sm:px-6 flex items-center border-b border-appBorder bg-surface/80 backdrop-blur-md sticky top-0 z-10 chat-header">
+            {isAuthenticated && (
+              <button
+                className={`${isRTL ? "ml-3 -mr-2" : "mr-3 -ml-2"} p-2 rounded-lg border-none bg-transparent text-muted hover:bg-surface2 cursor-pointer md:hidden transition-colors`}
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                title={t.menu}
               >
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
-            </button>
-          )}
-          <h1 className="text-[1.1rem] sm:text-[1.15rem] font-bold text-appText m-0 logo-title">{t.headerTitle}</h1>
-          {isGuest && (
-            <button
-              className={`${isRTL ? "mr-auto" : "ml-auto"} w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2`}
-              onClick={() => setAppState("login")}
-              title={t.loginButton}
-            >
-              🔑
-            </button>
-          )}
-        </div>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+            )}
+            <h1 className="text-[1.1rem] sm:text-[1.15rem] font-bold text-appText m-0 logo-title">{t.headerTitle}</h1>
+            {isGuest && (
+              <button
+                className={`${isRTL ? "mr-auto" : "ml-auto"} w-10 h-10 rounded-xl bg-surface2 border border-appBorder text-muted flex items-center justify-center cursor-pointer transition-all duration-200 hover:text-accent2 focus:outline-none focus:ring-2 focus:ring-accent2`}
+                onClick={() => setAppState("login")}
+                title={t.loginButton}
+              >
+                🔑
+              </button>
+            )}
+          </div>
 
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 flex flex-col gap-6 scrollbar-thin scrollbar-thumb-muted">
-          {messages.map((msg, i) => (
-            <MessageBubble
-              key={i}
-              role={msg.role}
-              content={msg.content}
-              onEdit={(newText) => handleEditMessage(i, newText)}
-              onDelete={() => handleDeleteMessage(i)}
-              language={language}
-            />
-          ))}
-          {loading && (
-            <div className={`flex items-start gap-2.5 max-w-[780px] ${isRTL ? "ml-auto" : "mr-auto"} animate-fadeUp`}>
-              <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 border-none bg-transparent">
-                <span>⚖️</span>
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 flex flex-col gap-6 scrollbar-thin scrollbar-thumb-muted">
+            {messages.map((msg, i) => (
+              <MessageBubble
+                key={i}
+                role={msg.role}
+                content={msg.content}
+                onEdit={(newText) => handleEditMessage(i, newText)}
+                onDelete={() => handleDeleteMessage(i)}
+                language={language}
+              />
+            ))}
+            {loading && (
+              <div className={`flex items-start gap-2.5 max-w-[780px] ${isRTL ? "ml-auto" : "mr-auto"} animate-fadeUp`}>
+                <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 border-none bg-transparent">
+                  <span>⚖️</span>
+                </div>
+                <div className={`relative p-3.5 sm:p-4 ${isRTL ? "rounded-[16px] rounded-tr-sm" : "rounded-[16px] rounded-tl-sm"} bg-surface border border-appBorder shadow-sm flex items-center gap-1.5 min-h-[44px] typing-indicator`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out]"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out_0.2s]"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out_0.4s]"></span>
+                </div>
               </div>
-              <div className={`relative p-3.5 sm:p-4 ${isRTL ? "rounded-[16px] rounded-tr-sm" : "rounded-[16px] rounded-tl-sm"} bg-surface border border-appBorder shadow-sm flex items-center gap-1.5 min-h-[44px] typing-indicator`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out]"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out_0.2s]"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out_0.4s]"></span>
-              </div>
-            </div>
-          )}
-          <div ref={bottomRef} className="h-4" />
-        </div>
+            )}
+            <div ref={bottomRef} className="h-4" />
+          </div>
 
-        <InputBar onSend={handleSend} isLoading={loading} onStop={handleStop} language={language} />
-      </main>
+          <InputBar onSend={handleSend} isLoading={loading} onStop={handleStop} language={language} />
+        </main>
+      )}
     </div>
   );
 }
