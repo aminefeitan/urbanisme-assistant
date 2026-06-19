@@ -131,6 +131,32 @@ def toggle_pin_conversation(conversation_id: str, user: dict = Depends(get_curre
 
 # ─── Helper ───────────────────────────────────────────────────────────────────
 
+def generate_chat_title(message: str) -> str:
+    """Generate an intelligent short title summarizing the conversation intent."""
+    import os
+    from mistralai import Mistral
+    try:
+        api_key = os.environ.get("MISTRAL_API_KEY", "")
+        if not api_key:
+            title = message.replace("\n", " ").strip()
+            return title[:50] + "…" if len(title) > 50 else title
+        
+        client = Mistral(api_key=api_key)
+        prompt = f"Génère un titre très court (2 à 5 mots maximum) résumant le sujet de ce message. Le titre doit refléter l'idée générale (ex: 'Construction sur limite', 'Régularisation', 'Permis de construire'). Le titre DOIT ÊTRE DANS LA MÊME LANGUE que le message de l'utilisateur (ex: si le message est en arabe, le titre doit être en arabe). Ne mets pas de guillemets ni de ponctuation inutile, juste le texte du titre.\n\nMessage: '{message}'"
+        
+        resp = client.chat.complete(
+            model="mistral-small-latest",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=15,
+            temperature=0.3
+        )
+        title = resp.choices[0].message.content.strip(" '\"*\n")
+        return title[:50]
+    except Exception as e:
+        print(f"Erreur generate_chat_title: {e}")
+        title = message.replace("\n", " ").strip()
+        return title[:50] + "…" if len(title) > 50 else title
+
 def _upsert_conversation(session_id: str, user_id: int, first_message: str):
     """Create conversation if it doesn't exist, or update its timestamp."""
     conn = get_connection()
@@ -139,10 +165,8 @@ def _upsert_conversation(session_id: str, user_id: int, first_message: str):
         cur.execute("SELECT id FROM conversations WHERE id = %s", (session_id,))
         exists = cur.fetchone()
         if not exists:
-            # Generate title from first message
-            title = first_message.replace("\n", " ").strip()
-            if len(title) > 50:
-                title = title[:50] + "…"
+            # Generate intelligent title from first message
+            title = generate_chat_title(first_message)
             if not title:
                 title = "Nouvelle conversation"
             cur.execute(

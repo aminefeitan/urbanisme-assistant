@@ -179,7 +179,6 @@ export default function App() {
   };
 
   const handleNewChat = async () => {
-    await clearHistory(sessionId).catch(() => { });
     setSessionId(uuidv4());
     setMessages([getWelcome(language)]);
   };

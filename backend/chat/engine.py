@@ -93,20 +93,15 @@ def search_articles(query: str, top_k: int = 5) -> List[Dict]:
 SYSTEM_PROMPT = """Tu es un conseiller juridique expert, empathique et spécialisé en droit de l'urbanisme marocain (Loi 12-90), au service des citoyens de Khénifra. Ton but est de simplifier les lois complexes pour les rendre accessibles à tous.
 
 ════════════════════════════════════════════
-RÈGLE N°1 — LANGUE DE RÉPONSE (OBLIGATOIRE)
+RÈGLE N°1 — LANGUE DE RÉPONSE (PRIORITÉ À L'UTILISATEUR)
 ════════════════════════════════════════════
-Détecte la langue et le dialecte du message de l'utilisateur et réponds EXACTEMENT dans le même style, sans exception :
+Si l'utilisateur demande explicitement une langue, une traduction, ou un format précis (ex: "Traduis en arabe", "Réponds en anglais"), OBÉIS TOUJOURS À SA DEMANDE en priorité absolue.
+
+Sinon, détecte la langue et le dialecte du message de l'utilisateur et réponds par défaut dans le même style :
 • Message en Darija marocaine (الدارجة) → réponds en DARIJA MAROCAINE UNIQUEMENT (ex: "شنو", "باش", "ديال", "غادي", "خاصك"). NE PARLE JAMAIS EN ÉGYPTIEN (pas de "عشان", "كده", "إيه", "بتاع", "أزيك").
 • Message en arabe classique (فصحى) → réponds en ARABE CLASSIQUE.
-• Message en français → réponds en FRANÇAIS uniquement, du début à la fin.
+• Message en français → réponds en FRANÇAIS.
 • Message mixte (Darija + Français) → réponds en DARIJA MAROCAINE principalement.
-
-Exemples stricts :
-✗ INTERDIT — "عشان تبني لازم رخصة" (Égyptien interdit)
-✗ INTERDIT — Question en français → réponse en arabe
-✗ INTERDIT — Répondre en arabe classique strict si l'utilisateur parle en Darija (utiliser des termes courants de la darija si approprié).
-✓ CORRECT  — "Mon voisin a construit sans permis" → réponse 100% en français
-✓ CORRECT  — "جاري بنى بلا رخصة شنو ندير" → réponse en Darija marocaine ("باش تبني خاصك رخصة...", "بالنسبة للقانون...")
 
 Les termes juridiques techniques restent précis quelle que soit la langue.
 
@@ -131,15 +126,20 @@ Structure UNIQUEMENT les réponses concernant des problèmes d'urbanisme avec ce
 → À qui s'adresser à Khénifra (Commune, Agence Urbaine, etc.).
 
 ════════════════════════════════
-RÈGLE N°3 — SALUTATIONS ET HORS-SUJET (PRIORITÉ ABSOLUE)
+RÈGLE N°3 — ADAPTABILITÉ ET INTELLIGENCE (PRIORITÉ ABSOLUE)
 ════════════════════════════════
-- Si l'utilisateur dit JUSTE "salam", "bonjour", "merci" ou pose une question hors-sujet :
-   => IGNORE complètement les extraits de loi fournis.
-   => NE DONNE AUCUN DÉTAIL JURIDIQUE.
-   => N'UTILISE JAMAIS le format des 5 sections.
-   => Fais une réponse TRÈS COURTE (1 phrase). Exemple si l'utilisateur dit "salam" : "وعليكم السلام، أنا المساعد الذكي الخاص بالتعمير في خنيفرة. كيفاش نقدر نعاونك في مجال البناء أو الرخص؟"
-- Base-toi UNIQUEMENT sur les extraits fournis pour les vraies questions d'urbanisme.
-- Longueur idéale (urbanisme) : 200-300 mots. Sois concis, clair et direct."""
+- 🌐 TRADUCTION ET LANGUE : Si le message de l'utilisateur est juste un nom de langue (ex: "en arabe", "en ar", "ar", "بالفرنسية", "darija") ou une demande de traduction, TRADUIS IMMÉDIATEMENT la réponse précédente dans la langue demandée. NE CONSIDÈRE PAS cela comme hors-sujet et NE LUI DEMANDE PAS de préciser sa question.
+- 🗣️ QUESTIONS DE SUIVI : Si l'utilisateur pose une question sur la réponse précédente (ex: "ça veut dire quoi ?", "et si c'est le contraire ?"), réponds naturellement en tenant compte du contexte, sans forcer le format des 5 sections.
+- 🚫 HORS-SUJET ET SALUTATIONS : Si l'utilisateur pose une question totalement sans rapport avec l'urbanisme, refuse poliment de répondre.
+- Longueur idéale (urbanisme) : 200-300 mots. Sois concis, clair et direct.
+
+════════════════════════════════
+RÈGLE N°4 — CITATIONS ET ANTI-HALLUCINATION (CRITIQUE)
+════════════════════════════════
+- 🛑 ANTI-INVENTION : Si les extraits de la loi 12-90 fournis ne permettent pas de répondre avec certitude, dis CLAIREMENT que l'information n'est pas présente dans les textes. N'INVENTE JAMAIS une règle juridique.
+- 📌 CITATIONS OBLIGATOIRES : Chaque affirmation juridique doit citer l'article exact utilisé en utilisant le format [Article X].
+Exemple : "Selon l'[Article 40], aucune construction..."
+Si tu ne trouves pas d'article pertinent dans le contexte, dis-le et recommande un professionnel."""
 
 
 # ─── Main Chat Function ───────────────────────────────────────────────────────
@@ -185,9 +185,22 @@ def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int =
         _save_message(session_id, "assistant", warning, user_id)
         return warning
 
-    # Step 2: retrieve relevant articles
-    articles = search_articles(query, top_k=5)
-    relevant = [a for a in articles if a["similarity"] > 0.30]
+    # Step 1.5: Early Intent Detection (Routing)
+    query_lower = query.strip().lower()
+    salutations = ["salam", "bonjour", "salut", "hello", "merci", "chokran", "شكرا", "سلام"]
+    is_greeting = query_lower in salutations or (len(query) < 15 and any(s in query_lower for s in salutations))
+    
+    translation_keywords = ["en ar", "en arabe", "en fr", "en français", "traduis", "traduction", "ترجم", "بالعربية", "بالفرنسية", "ar", "fr", "darija", "en darija"]
+    is_translation = any(query_lower == kw or query_lower.startswith(f"{kw} ") for kw in translation_keywords) and len(query) < 40
+
+    if is_greeting or is_translation:
+        # Bypass RAG completely for small talk and translations
+        relevant = []
+        articles = []
+    else:
+        # Step 2: retrieve relevant articles
+        articles = search_articles(query, top_k=10)
+        relevant = [a for a in articles if a["similarity"] > 0.45]
 
     # Step 3: build context block
     db_used = False
@@ -215,23 +228,33 @@ def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int =
 
     # Determine language instruction based on explicit user choice
     if language == "fr":
-        lang_instruction = "[LANGUE CHOISIE PAR L'UTILISATEUR: FRANÇAIS — réponds UNIQUEMENT en français, du début à la fin. Ne mélange AUCUN mot arabe dans ta réponse.]"
+        lang_instruction = "[CONTEXTE DE L'INTERFACE: FRANÇAIS. Sauf si l'utilisateur demande explicitement une autre langue ou une traduction, réponds en français.]"
     else:
         # Default: Arabic/Darija — use auto-detection for dialect
         arabic_chars = sum(1 for c in query if '\u0600' <= c <= '\u06FF')
         ratio = arabic_chars / max(len(query.replace(' ', '')), 1)
         if ratio > 0.35:
-            lang_instruction = "[LANGUE DÉTECTÉE: ARABE / DARIJA — réponds EXCLUSIVEMENT en DARIJA MAROCAINE (الدارجة المغربية). N'UTILISE AUCUN MOT ÉGYPTIEN (pas de 'عشان', 'كده', 'ايه') !]"
+            lang_instruction = "[LANGUE DÉTECTÉE: ARABE / DARIJA. Sauf si l'utilisateur demande explicitement une autre langue ou une traduction, réponds en DARIJA MAROCAINE (الدارجة المغربية).]"
+        elif ratio == 0 and len(query.strip()) > 0:
+            lang_instruction = "[LANGUE DÉTECTÉE: FRANÇAIS. L'utilisateur a posé sa question en français. Sauf s'il demande une traduction, réponds en FRANÇAIS, même si l'interface est en arabe.]"
         else:
-            lang_instruction = "[LANGUE CHOISIE: ARABE — L'utilisateur a choisi l'arabe. Réponds en DARIJA MAROCAINE (الدارجة المغربية) par défaut.]"
+            lang_instruction = "[CONTEXTE DE L'INTERFACE: ARABE. Sauf si l'utilisateur demande explicitement une autre langue ou une traduction, réponds en DARIJA MAROCAINE (الدارجة المغربية) par défaut.]"
 
-    db_status = f"✅ {total_articles} articles chargés" if db_used else f"⚠️ {total_articles} articles disponibles mais aucun pertinent"
-    user_content = (
-        f"{lang_instruction}\n"
-        f"Plainte / سؤال: {query}\n\n"
-        f"[DB Status: {db_status}]\n"
-        f"--- Extraits Loi 12-90 pertinents ---\n{context}"
-    )
+    if is_greeting:
+        user_content = f"L'utilisateur dit simplement une salutation ou un remerciement : '{query}'. Réponds brièvement avec politesse en 1 ou 2 phrases."
+        db_used = False
+    elif is_translation:
+        user_content = f"L'utilisateur demande une TRADUCTION de ta réponse précédente. Instruction de l'utilisateur : '{query}'. TRADUIS ta réponse précédente avec précision dans la langue demandée. NE CONSIDÈRE PAS ce message comme une nouvelle question et IGNORE les règles de format strictes."
+        db_used = False
+    else:
+        db_status = f"✅ {total_articles} articles chargés" if db_used else f"⚠️ {total_articles} articles disponibles mais aucun pertinent"
+        user_content = (
+            f"{lang_instruction}\n"
+            f"Message de l'utilisateur : {query}\n\n"
+            f"[DB Status: {db_status}]\n"
+            f"--- Extraits Loi 12-90 pertinents ---\n{context}"
+        )
+
     messages.append({"role": "user", "content": user_content})
 
     # Step 5: call Mistral
@@ -243,9 +266,6 @@ def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int =
     )
     answer = resp.choices[0].message.content
 
-    # Add DB source indicator
-    if db_used:
-        answer += f"\n\n---\n*📚 بناءً على {len(relevant)} مواد من القانون 12-90 | Basé sur {len(relevant)} articles de la Loi 12-90*"
 
     # Step 6: persist
     _save_message(session_id, "user", query, user_id)
