@@ -19,7 +19,9 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     return {
         "id": int(payload["sub"]),
         "email": payload["email"],
-        "name": payload.get("name")
+        "name": payload.get("name"),
+        "first_name": payload.get("first_name"),
+        "last_name": payload.get("last_name")
     }
 
 def get_current_user_optional(credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -41,6 +43,8 @@ def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(securi
         return {
             "id": int(payload["sub"]),
             "email": payload["email"],
-            "name": payload.get("name")
+            "name": payload.get("name"),
+            "first_name": payload.get("first_name"),
+            "last_name": payload.get("last_name")
         }
     return None

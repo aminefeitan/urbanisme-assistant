@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { uploadPDF } from "../services/api";
+import { uploadPDF, updateProfile } from "../services/api";
 import translations from "../translations";
 
 export default function Sidebar({
@@ -19,16 +19,50 @@ export default function Sidebar({
   language = "ar",
   onLanguageChange,
   onOpenSettings,
+  onUpdateUser,
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState(true);
+  const [selectedLaw, setSelectedLaw] = useState("12-90");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showConvoPopover, setShowConvoPopover] = useState(false);
+  const [profileFirstName, setProfileFirstName] = useState(user?.first_name || "");
+  const [profileLastName, setProfileLastName] = useState(user?.last_name || "");
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  
   const avatarRef = useRef(null);
   const convoIconRef = useRef(null);
+
+  // Initialize profile form when user changes
+  React.useEffect(() => {
+    if (user) {
+      setProfileFirstName(user.first_name || "");
+      setProfileLastName(user.last_name || "");
+    }
+  }, [user]);
+
+  const handleSaveProfile = async () => {
+    setProfileSaving(true);
+    setProfileError("");
+    try {
+      const data = await updateProfile(profileFirstName, profileLastName);
+      if (data.token) {
+        localStorage.setItem("authToken", data.token);
+      }
+      if (onUpdateUser) {
+        onUpdateUser(data.user);
+      }
+      setShowProfileModal(false);
+    } catch (err) {
+      setProfileError(err.message);
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   const t = translations[language] || translations.ar;
   const isRTL = language === "ar";
@@ -71,7 +105,7 @@ export default function Sidebar({
     setUploading(true);
     setUploadMsg("");
     try {
-      const res = await uploadPDF(file);
+      const res = await uploadPDF(file, selectedLaw);
       setUploadMsg("✅ " + res.message);
       setUploadSuccess(true);
     } catch (err) {
@@ -277,6 +311,15 @@ export default function Sidebar({
             <p className="text-[0.8rem] text-slate-500 dark:text-slate-400 mb-3 px-1 leading-relaxed">
               {t.ocrDescription}
             </p>
+            <select
+              value={selectedLaw}
+              onChange={(e) => setSelectedLaw(e.target.value)}
+              disabled={uploading}
+              className="w-full mb-3 px-3 py-2 bg-surface2 border border-appBorder rounded-lg text-appText text-[0.85rem] focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              <option value="12-90">Loi 12-90 (Urbanisme)</option>
+              <option value="25-90">Loi 25-90 (Lotissements)</option>
+            </select>
             <label className={`w-full flex items-center justify-center py-2.5 px-4 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-[0.85rem] font-medium cursor-pointer transition-all hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100 ${uploading ? "opacity-70 pointer-events-none" : ""}`}>
               {uploading ? t.ocrUploading : t.ocrButton}
               <input type="file" accept=".pdf" onChange={handleFile} disabled={uploading} className="hidden" />
@@ -307,7 +350,7 @@ export default function Sidebar({
             {!collapsed && (
               <>
                 <div className="flex-1 min-w-0 text-[0.92rem] font-semibold text-appText truncate user-name">
-                  {user.first_name || user.name || t.user}
+                  {(user.first_name && user.last_name) ? `${user.first_name} ${user.last_name}` : (user.first_name || user.name || t.user)}
                 </div>
               </>
             )}
@@ -414,7 +457,7 @@ export default function Sidebar({
                  {getInitials()}
                </div>
                <div className="flex flex-col min-w-0">
-                 <span className="font-semibold text-[0.95rem] text-appText truncate">{user?.first_name || user?.name || t.user}</span>
+                 <span className="font-semibold text-[0.95rem] text-appText truncate">{(user?.first_name && user?.last_name) ? `${user.first_name} ${user.last_name}` : (user?.first_name || user?.name || t.user)}</span>
                  <span className="text-[0.7rem] text-muted break-all leading-tight mt-0.5">{user?.email}</span>
                </div>
             </div>
@@ -473,28 +516,21 @@ export default function Sidebar({
                 >
                   {getInitials()}
                 </div>
-                <button 
-                  className="absolute bottom-1 right-1 w-8 h-8 bg-surface border border-appBorder rounded-full flex items-center justify-center cursor-pointer shadow-md text-muted hover:text-appText transition-colors hover:bg-surface2"
-                  title={t.changePhoto}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                  </svg>
-                </button>
               </div>
             </div>
             
             <div className="flex flex-col gap-3">
               <div className="border border-appBorder rounded-xl px-3 py-1.5 focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-all bg-surface">
                 <label className="block text-[0.7rem] text-muted mb-0.5">{t.firstName}</label>
-                <input type="text" defaultValue={user?.first_name || ""} className="w-full bg-transparent border-none p-0 text-[0.95rem] text-appText focus:outline-none focus:ring-0" />
+                <input type="text" value={profileFirstName} onChange={(e) => setProfileFirstName(e.target.value)} className="w-full bg-transparent border-none p-0 text-[0.95rem] text-appText focus:outline-none focus:ring-0" disabled={profileSaving} />
               </div>
               <div className="border border-appBorder rounded-xl px-3 py-1.5 focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-all bg-surface">
                 <label className="block text-[0.7rem] text-muted mb-0.5">{t.lastName}</label>
-                <input type="text" defaultValue={user?.last_name || ""} className="w-full bg-transparent border-none p-0 text-[0.95rem] text-appText focus:outline-none focus:ring-0" />
+                <input type="text" value={profileLastName} onChange={(e) => setProfileLastName(e.target.value)} className="w-full bg-transparent border-none p-0 text-[0.95rem] text-appText focus:outline-none focus:ring-0" disabled={profileSaving} />
               </div>
             </div>
+            
+            {profileError && <p className="text-[0.8rem] text-red-500 mt-2 text-center">{profileError}</p>}
             
             <p className="text-[0.75rem] text-muted text-center mt-3 mb-8">
               {t.profileHelp}
@@ -504,17 +540,16 @@ export default function Sidebar({
               <button 
                 className="px-5 py-2 rounded-full border border-appBorder bg-transparent text-appText hover:bg-surface2 cursor-pointer transition-colors font-medium text-[0.9rem]" 
                 onClick={() => setShowProfileModal(false)}
+                disabled={profileSaving}
               >
                 {t.cancel}
               </button>
               <button 
-                className="px-5 py-2 rounded-full border-none bg-appText text-surface hover:opacity-90 cursor-pointer transition-opacity font-medium text-[0.9rem]" 
-                onClick={() => {
-                  // mock save
-                  setShowProfileModal(false);
-                }}
+                className={`px-5 py-2 rounded-full border-none bg-appText text-surface cursor-pointer transition-opacity font-medium text-[0.9rem] ${profileSaving ? "opacity-70 pointer-events-none" : "hover:opacity-90"}`}
+                onClick={handleSaveProfile}
+                disabled={profileSaving}
               >
-                {t.save}
+                {profileSaving ? "..." : t.save}
               </button>
             </div>
           </div>

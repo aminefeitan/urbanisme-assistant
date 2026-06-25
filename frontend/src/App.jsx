@@ -281,6 +281,7 @@ export default function App() {
           onDeleteConversation={handleDeleteConversation}
           onPinConversation={handlePinConversation}
           user={user}
+          onUpdateUser={(userData) => setUser(userData)}
           onLogout={handleLogout}
           isLightMode={isLightMode}
           onToggleTheme={() => setIsLightMode(!isLightMode)}
@@ -357,8 +358,12 @@ export default function App() {
             ))}
             {loading && (
               <div className={`flex items-start gap-2.5 max-w-[780px] ${isRTL ? "ml-auto" : "mr-auto"} animate-fadeUp`}>
-                <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 border-none bg-transparent">
-                  <span>⚖️</span>
+                <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 border-none bg-transparent overflow-hidden">
+                  <img
+                    src="/logo_chatbot.png"
+                    alt="Bot"
+                    className="w-full h-full object-contain scale-[1.81]"
+                  />
                 </div>
                 <div className={`relative p-3.5 sm:p-4 ${isRTL ? "rounded-[16px] rounded-tr-sm" : "rounded-[16px] rounded-tl-sm"} bg-surface border border-appBorder shadow-sm flex items-center gap-1.5 min-h-[44px] typing-indicator`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-muted animate-[bounce_1.2s_infinite_ease-in-out]"></span>

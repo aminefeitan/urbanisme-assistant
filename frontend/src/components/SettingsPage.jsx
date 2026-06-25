@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import translations from "../translations";
 
 export default function SettingsPage({
@@ -8,58 +8,54 @@ export default function SettingsPage({
   onLanguageChange,
   onBack,
 }) {
-  const [expandedSection, setExpandedSection] = useState(null);
+  // null = main settings, "privacy" | "terms" | "about" = sub-page
+  const [activePage, setActivePage] = useState(null);
   const t = translations[language] || translations.ar;
   const isRTL = language === "ar";
 
-  const toggleSection = (section) => {
-    setExpandedSection((prev) => (prev === section ? null : section));
-  };
-
-  // Accordion content wrapper with smooth height animation
-  const AccordionContent = ({ isOpen, children }) => {
-    const contentRef = useRef(null);
-    const [maxHeight, setMaxHeight] = useState(0);
-
-    useEffect(() => {
-      if (isOpen && contentRef.current) {
-        setMaxHeight(contentRef.current.scrollHeight);
-      } else {
-        setMaxHeight(0);
-      }
-    }, [isOpen]);
-
+  const ProfessionalTextRenderer = ({ text, isRTL }) => {
+    const blocks = text.split('\n\n');
     return (
-      <div
-        style={{
-          maxHeight: isOpen ? maxHeight + "px" : "0px",
-          overflow: "hidden",
-          transition: "max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-        }}
-      >
-        <div ref={contentRef}>{children}</div>
+      <div className={`text-[0.9rem] leading-relaxed text-muted ${isRTL ? 'text-right font-arabic' : 'text-left font-sans'}`}>
+        {blocks.map((block, i) => {
+          if (!block.trim()) return null;
+          const lines = block.split('\n');
+          const isHeading = /^(\d+\.|Principales fonctionnalités|Notre mission|Vision|مهمتنا|الرؤية|الميزات الرئيسية)/i.test(lines[0].trim());
+                            
+          if (isHeading) {
+            return (
+              <div key={i} className="mb-5 last:mb-0">
+                <h4 className="text-[1rem] font-bold text-appText mb-2.5 mt-2 flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-accent rounded-full inline-block"></span>
+                  {lines[0]}
+                </h4>
+                <div className="pl-3 rtl:pr-3 rtl:pl-0">
+                  {lines.slice(1).map((line, j) => (
+                    <p key={j} className="mb-2 opacity-90 flex items-start gap-2.5 text-[0.88rem]">
+                      {line.trim().startsWith('-') ? (
+                        <>
+                          <span className="text-accent2 mt-1.5 shrink-0 text-[0.7rem] opacity-70">●</span>
+                          <span className="leading-relaxed">{line.trim().substring(1).trim()}</span>
+                        </>
+                      ) : (
+                        <span className="leading-relaxed">{line}</span>
+                      )}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          
+          return (
+            <p key={i} className={`mb-4 leading-relaxed opacity-90 text-[0.88rem] ${i === 0 && text.includes('Dernière mise à jour') ? 'text-[0.75rem] italic opacity-60' : ''}`}>
+              {block}
+            </p>
+          );
+        })}
       </div>
     );
   };
-
-  const ChevronIcon = ({ isOpen }) => (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{
-        transition: "transform 0.3s ease",
-        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-      }}
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
 
   const SunIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -84,6 +80,12 @@ export default function SettingsPage({
   const BackIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points={isRTL ? "9 18 15 12 9 6" : "15 18 9 12 15 6"} />
+    </svg>
+  );
+
+  const ArrowRightIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points={isRTL ? "15 18 9 12 15 6" : "9 18 15 12 9 6"} />
     </svg>
   );
 
@@ -133,6 +135,69 @@ export default function SettingsPage({
     </svg>
   );
 
+  // ── Sub-page configuration ──
+  const pageConfig = {
+    privacy: {
+      title: t.privacyPolicy,
+      content: t.privacyPolicyContent,
+      icon: <ShieldIcon />,
+      gradient: "from-emerald-500/20 to-teal-500/20",
+      iconColor: "text-emerald-500",
+    },
+    terms: {
+      title: t.termsOfUse,
+      content: t.termsOfUseContent,
+      icon: <FileTextIcon />,
+      gradient: "from-violet-500/20 to-purple-500/20",
+      iconColor: "text-violet-500",
+    },
+    about: {
+      title: t.about,
+      content: t.aboutContent,
+      icon: <InfoIcon />,
+      gradient: "from-rose-500/20 to-pink-500/20",
+      iconColor: "text-rose-500",
+    },
+  };
+
+  // ── Sub-page view ──
+  if (activePage && pageConfig[activePage]) {
+    const config = pageConfig[activePage];
+    return (
+      <div
+        className="flex-1 flex flex-col min-w-0 h-full bg-surface relative z-0"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        {/* Sub-page Header */}
+        <div className="h-[72px] shrink-0 px-4 sm:px-6 flex items-center gap-3 border-b border-appBorder bg-surface/80 backdrop-blur-md sticky top-0 z-10">
+          <button
+            className="p-2 rounded-xl border-none bg-transparent text-muted hover:bg-surface2 hover:text-appText cursor-pointer transition-all duration-200"
+            onClick={() => setActivePage(null)}
+            title={isRTL ? "رجوع" : "Retour"}
+          >
+            <BackIcon />
+          </button>
+          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${config.gradient} flex items-center justify-center ${config.iconColor} shrink-0`}>
+            {config.icon}
+          </div>
+          <h1 className="text-[1.1rem] sm:text-[1.15rem] font-bold text-appText m-0">
+            {config.title}
+          </h1>
+        </div>
+
+        {/* Sub-page Content */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 scrollbar-thin scrollbar-thumb-muted">
+          <div className="max-w-[640px] mx-auto">
+            <div className="bg-surface2/50 border border-appBorder/50 rounded-2xl p-5 sm:p-8 shadow-sm">
+              <ProfessionalTextRenderer text={config.content} isRTL={isRTL} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main settings view ──
   return (
     <div
       className="flex-1 flex flex-col min-w-0 h-full bg-surface relative z-0"
@@ -233,11 +298,11 @@ export default function SettingsPage({
           {/* ── Divider ── */}
           <div className="h-px bg-appBorder my-2" />
 
-          {/* ── Privacy Policy ── */}
+          {/* ── Privacy Policy Button ── */}
           <div className="bg-surface border border-appBorder rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent2/30">
             <button
               className="w-full px-5 py-4 flex items-center gap-4 bg-transparent border-none cursor-pointer text-left"
-              onClick={() => toggleSection("privacy")}
+              onClick={() => setActivePage("privacy")}
               dir={isRTL ? "rtl" : "ltr"}
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-emerald-500 shrink-0">
@@ -246,29 +311,17 @@ export default function SettingsPage({
               <div className="flex-1 min-w-0">
                 <h3 className="text-[0.95rem] font-semibold text-appText m-0">{t.privacyPolicy}</h3>
               </div>
-              <span className="text-muted shrink-0">
-                <ChevronIcon isOpen={expandedSection === "privacy"} />
+              <span className="text-muted shrink-0 opacity-50">
+                <ArrowRightIcon />
               </span>
             </button>
-            <AccordionContent isOpen={expandedSection === "privacy"}>
-              <div className="px-5 pb-5 pt-0">
-                <div className="bg-surface2 rounded-xl p-4 sm:p-5">
-                  <pre
-                    className="text-[0.85rem] text-muted leading-relaxed whitespace-pre-wrap m-0 font-sans"
-                    dir={isRTL ? "rtl" : "ltr"}
-                  >
-                    {t.privacyPolicyContent}
-                  </pre>
-                </div>
-              </div>
-            </AccordionContent>
           </div>
 
-          {/* ── Terms of Use ── */}
+          {/* ── Terms of Use Button ── */}
           <div className="bg-surface border border-appBorder rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent2/30">
             <button
               className="w-full px-5 py-4 flex items-center gap-4 bg-transparent border-none cursor-pointer text-left"
-              onClick={() => toggleSection("terms")}
+              onClick={() => setActivePage("terms")}
               dir={isRTL ? "rtl" : "ltr"}
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center text-violet-500 shrink-0">
@@ -277,29 +330,17 @@ export default function SettingsPage({
               <div className="flex-1 min-w-0">
                 <h3 className="text-[0.95rem] font-semibold text-appText m-0">{t.termsOfUse}</h3>
               </div>
-              <span className="text-muted shrink-0">
-                <ChevronIcon isOpen={expandedSection === "terms"} />
+              <span className="text-muted shrink-0 opacity-50">
+                <ArrowRightIcon />
               </span>
             </button>
-            <AccordionContent isOpen={expandedSection === "terms"}>
-              <div className="px-5 pb-5 pt-0">
-                <div className="bg-surface2 rounded-xl p-4 sm:p-5">
-                  <pre
-                    className="text-[0.85rem] text-muted leading-relaxed whitespace-pre-wrap m-0 font-sans"
-                    dir={isRTL ? "rtl" : "ltr"}
-                  >
-                    {t.termsOfUseContent}
-                  </pre>
-                </div>
-              </div>
-            </AccordionContent>
           </div>
 
-          {/* ── About ── */}
+          {/* ── About Button ── */}
           <div className="bg-surface border border-appBorder rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent2/30">
             <button
               className="w-full px-5 py-4 flex items-center gap-4 bg-transparent border-none cursor-pointer text-left"
-              onClick={() => toggleSection("about")}
+              onClick={() => setActivePage("about")}
               dir={isRTL ? "rtl" : "ltr"}
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500/20 to-pink-500/20 flex items-center justify-center text-rose-500 shrink-0">
@@ -308,22 +349,10 @@ export default function SettingsPage({
               <div className="flex-1 min-w-0">
                 <h3 className="text-[0.95rem] font-semibold text-appText m-0">{t.about}</h3>
               </div>
-              <span className="text-muted shrink-0">
-                <ChevronIcon isOpen={expandedSection === "about"} />
+              <span className="text-muted shrink-0 opacity-50">
+                <ArrowRightIcon />
               </span>
             </button>
-            <AccordionContent isOpen={expandedSection === "about"}>
-              <div className="px-5 pb-5 pt-0">
-                <div className="bg-surface2 rounded-xl p-4 sm:p-5">
-                  <pre
-                    className="text-[0.85rem] text-muted leading-relaxed whitespace-pre-wrap m-0 font-sans"
-                    dir={isRTL ? "rtl" : "ltr"}
-                  >
-                    {t.aboutContent}
-                  </pre>
-                </div>
-              </div>
-            </AccordionContent>
           </div>
 
           {/* Bottom spacing */}

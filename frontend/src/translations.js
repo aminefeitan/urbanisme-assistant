@@ -8,7 +8,7 @@ const translations = {
     // ─── Welcome message ───
     welcome: `مرحباً! أنا مساعدك القانوني لشؤون التعمير بالمغرب 🏛️
 
-أنا متخصص في **القانون 12-90** المتعلق بالتعمير بالمغرب.
+أنا متخصص في **القانونين 12-90 و 25-90** المتعلقين بالتعمير والتجزئات العقارية بالمغرب.
 
 **كيفاش نقدر نعاونك؟**
 - تحليل شكايتك ديال التعمير
@@ -47,9 +47,9 @@ const translations = {
     openMenu: "فتح القائمة",
     closeMenu: "إغلاق القائمة",
     ocrTitle: "📤 OCR — تحديث القانون",
-    ocrDescription: "استخدم فقط عند تغيير ملف PDF للقانون 12-90.",
+    ocrDescription: "استخدم فقط عند تغيير ملف PDF للقانونين 12-90 أو 25-90.",
     ocrUploading: "⏳ جاري المعالجة...",
-    ocrButton: "📎 تحميل PDF القانون 12-90",
+    ocrButton: "📎 تحميل PDF (12-90 / 25-90)",
     assistantUrbanisme: "مساعد التعمير",
     refresh: "تحديث",
 
@@ -127,7 +127,7 @@ const translations = {
 4. تحديد المسؤولية
 يتم تقديم المعلومات والتوصيات الناتجة عن الذكاء الاصطناعي كإرشاد فقط.
 لا يضمن مساعد التعمير الدقة المطلقة للنتائج ولا يمكن تحميله مسؤولية القرارات المتخذة بناءً على المعلومات المقدمة.
-يظل المستخدمون مسؤولين عن التحقق من التحليلات والتوصيات قبل أي استخدام مهني أو قرار إداري.
+يظل المستخدمون مسؤولون عن التحقق من التحليلات والتوصيات قبل أي استخدام مهني أو قرار إداري.
 
 5. توفر الخدمة
 نحن نسعى جاهدين لضمان توفر الخدمة ولكن لا نضمن وصولاً غير منقطع أو خاليًا من الأخطاء.
@@ -184,7 +184,7 @@ const translations = {
     // ─── Landing page ───
     landingTitle: "مساعدك الذكي في",
     landingTitleHighlight: "التعمير",
-    landingDescription: "حلل، صمم وافهم أراضيك بشكل أفضل بفضل الذكاء الاصطناعي. اكتشف القانون 12-90 ببساطة.",
+    landingDescription: "حلل، صمم وافهم أراضيك بشكل أفضل بفضل الذكاء الاصطناعي. اكتشف قوانين التعمير 12-90 و 25-90 ببساطة.",
     landingStart: "ابدأ الآن",
     landingLogin: "تسجيل الدخول",
     landingRegister: "إنشاء حساب",
@@ -232,7 +232,7 @@ const translations = {
     // ─── Welcome message ───
     welcome: `Bonjour ! Je suis votre assistant juridique spécialisé en urbanisme au Maroc 🏛️
 
-Je suis expert en **Loi 12-90** relative à l'urbanisme au Maroc.
+Je suis expert en **Lois 12-90 et 25-90** relatives à l'urbanisme et lotissements au Maroc.
 
 **Comment puis-je vous aider ?**
 - Analyser votre réclamation d'urbanisme
@@ -271,9 +271,9 @@ Décrivez votre question ou réclamation ci-dessous 👇`,
     openMenu: "Ouvrir le menu",
     closeMenu: "Réduire le menu",
     ocrTitle: "📤 OCR — Mise à jour loi",
-    ocrDescription: "Utilise uniquement quand le PDF de la loi 12-90 change.",
+    ocrDescription: "Utilise uniquement quand le PDF des lois 12-90 ou 25-90 change.",
     ocrUploading: "⏳ OCR en cours...",
-    ocrButton: "📎 Charger PDF loi 12-90",
+    ocrButton: "📎 Charger PDF (12-90 / 25-90)",
     assistantUrbanisme: "Assistant Urbanisme",
     refresh: "Actualiser",
 
@@ -408,7 +408,7 @@ Contribuer à une planification territoriale plus efficace, durable et fondée s
     // ─── Landing page ───
     landingTitle: "Votre Assistant IA en",
     landingTitleHighlight: "Urbanisme",
-    landingDescription: "Analysez, concevez et comprenez mieux vos territoires grâce à l'intelligence artificielle. Découvrez la loi 12-90 simplement.",
+    landingDescription: "Analysez, concevez et comprenez mieux vos territoires grâce à l'intelligence artificielle. Découvrez les lois 12-90 et 25-90 simplement.",
     landingStart: "Commencez",
     landingLogin: "Connexion",
     landingRegister: "S'inscrire",

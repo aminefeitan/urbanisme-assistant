@@ -29,7 +29,7 @@ def get_embedding(text: str) -> List[float]:
 
 # ─── Storage ──────────────────────────────────────────────────────────────────
 
-def store_article(article: Dict, source_pdf: str = "loi_12-90.pdf"):
+def store_article(article: Dict, source_pdf: str = "loi_12-90.pdf", loi_version: str = "12-90"):
     """Embed article and store in PostgreSQL."""
     text = f"Article {article.get('article_number', '')} {article.get('titre', '')} {article['contenu']}"
     embedding = get_embedding(text)
@@ -38,8 +38,8 @@ def store_article(article: Dict, source_pdf: str = "loi_12-90.pdf"):
     cur  = conn.cursor()
     cur.execute(
         """
-        INSERT INTO loi_articles (article_number, titre, contenu, embedding, source_pdf)
-        VALUES (%s, %s, %s, %s::vector, %s)
+        INSERT INTO loi_articles (article_number, titre, contenu, embedding, source_pdf, loi_version)
+        VALUES (%s, %s, %s, %s::vector, %s, %s)
         """,
         (
             article.get("article_number"),
@@ -47,6 +47,7 @@ def store_article(article: Dict, source_pdf: str = "loi_12-90.pdf"):
             article["contenu"],
             str(embedding),
             source_pdf,
+            loi_version,
         ),
     )
     conn.commit()
@@ -66,7 +67,8 @@ def search_articles(query: str, top_k: int = 5) -> List[Dict]:
     cur.execute(
         """
         SELECT article_number, titre, contenu,
-               1 - (embedding <=> %s::vector) AS similarity
+               1 - (embedding <=> %s::vector) AS similarity,
+               loi_version
         FROM   loi_articles
         ORDER  BY embedding <=> %s::vector
         LIMIT  %s
@@ -83,6 +85,7 @@ def search_articles(query: str, top_k: int = 5) -> List[Dict]:
             "titre":          r[1],
             "contenu":        r[2],
             "similarity":     float(r[3]),
+            "loi_version":    r[4],
         }
         for r in rows
     ]
@@ -90,7 +93,7 @@ def search_articles(query: str, top_k: int = 5) -> List[Dict]:
 
 # ─── System Prompt ────────────────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """Tu es un conseiller juridique expert, empathique et spécialisé en droit de l'urbanisme marocain (Loi 12-90), au service des citoyens de Khénifra. Ton but est de simplifier les lois complexes pour les rendre accessibles à tous.
+SYSTEM_PROMPT = """Tu es un conseiller juridique expert, empathique et spécialisé en droit de l'urbanisme marocain (Lois 12-90 et 25-90), au service des citoyens de Khénifra. Ton but est de simplifier les lois complexes pour les rendre accessibles à tous.
 
 ════════════════════════════════════════════
 RÈGLE N°1 — LANGUE DE RÉPONSE (PRIORITÉ À L'UTILISATEUR)
@@ -136,7 +139,7 @@ RÈGLE N°3 — ADAPTABILITÉ ET INTELLIGENCE (PRIORITÉ ABSOLUE)
 ════════════════════════════════
 RÈGLE N°4 — CITATIONS ET ANTI-HALLUCINATION (CRITIQUE)
 ════════════════════════════════
-- 🛑 ANTI-INVENTION : Si les extraits de la loi 12-90 fournis ne permettent pas de répondre avec certitude, dis CLAIREMENT que l'information n'est pas présente dans les textes. N'INVENTE JAMAIS une règle juridique.
+- 🛑 ANTI-INVENTION : Si les extraits des lois (12-90 / 25-90) fournis ne permettent pas de répondre avec certitude, dis CLAIREMENT que l'information n'est pas présente dans les textes. N'INVENTE JAMAIS une règle juridique.
 - 📌 CITATIONS OBLIGATOIRES : Chaque affirmation juridique doit citer l'article exact utilisé en utilisant le format [Article X].
 Exemple : "Selon l'[Article 40], aucune construction..."
 Si tu ne trouves pas d'article pertinent dans le contexte, dis-le et recommande un professionnel."""
@@ -176,9 +179,9 @@ def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int =
     if total_articles == 0:
         warning = (
             "⚠️ **قاعدة البيانات فارغة | Base de données vide**\n\n"
-            "مازال ما loadedش PDF ديال القانون 12-90 فالنظام.\n"
-            "Aucun article de la Loi 12-90 n'est encore chargé dans la base.\n\n"
-            "**خاصك دير:** panneau gauche → **Charger PDF loi 12-90** → sélectionne le PDF\n\n"
+            "مازال ما loadedش PDF ديال القانون 12-90 ولا 25-90 فالنظام.\n"
+            "Aucun article des lois 12-90 ou 25-90 n'est encore chargé dans la base.\n\n"
+            "**خاصك دير:** panneau gauche → **Charger PDF (12-90 / 25-90)** → sélectionne le PDF\n\n"
             "OCR غادي يخدم في arrière-plan (~10-15 min) — من بعد يرجع للسؤال ديالك ✅"
         )
         _save_message(session_id, "user", query, user_id)
@@ -210,7 +213,7 @@ def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int =
         for a in relevant:
             snippet = a["contenu"][:700].replace("\n", " ")
             context_lines.append(
-                f"• Article {a['article_number']} (score: {a['similarity']:.2f}): {snippet}"
+                f"• [Loi {a['loi_version']}] Article {a['article_number']} (score: {a['similarity']:.2f}): {snippet}"
             )
         context = "\n".join(context_lines)
     else:
@@ -252,7 +255,7 @@ def chat(query: str, session_id: str, history: List[Dict] = None, user_id: int =
             f"{lang_instruction}\n"
             f"Message de l'utilisateur : {query}\n\n"
             f"[DB Status: {db_status}]\n"
-            f"--- Extraits Loi 12-90 pertinents ---\n{context}"
+            f"--- Extraits de loi pertinents ---\n{context}"
         )
 
     messages.append({"role": "user", "content": user_content})

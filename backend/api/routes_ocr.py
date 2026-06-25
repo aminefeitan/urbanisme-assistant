@@ -1,17 +1,18 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
 from database.connection import get_connection
 from ocr.processor import ocr_pdf, parse_articles, POPPLER_PATH
 from chat.engine import store_article
 import pytesseract
 import os
+import time
 
 router = APIRouter()
 
 
 # ─── Background Task ──────────────────────────────────────────────────────────
 
-def process_and_store(pdf_bytes: bytes, filename: str):
-    print(f"\n[OCR] 🔍 Started: {filename}")
+def process_and_store(pdf_bytes: bytes, filename: str, loi_version: str):
+    print(f"\n[OCR] 🔍 Started: {filename} ({loi_version})")
     try:
         full_text = ocr_pdf(pdf_bytes=pdf_bytes, lang="fra+ara")
     except Exception as e:
@@ -29,9 +30,10 @@ def process_and_store(pdf_bytes: bytes, filename: str):
     ok = 0
     for i, article in enumerate(articles, 1):
         try:
-            store_article(article, source_pdf=filename)
+            store_article(article, source_pdf=filename, loi_version=loi_version)
             ok += 1
             print(f"[OCR] ✅ {ok}/{len(articles)} — Article {article.get('article_number')}")
+            time.sleep(1.5)  # Delay to prevent Mistral API 429 Rate Limit
         except Exception as e:
             print(f"[OCR] ⚠️  Article {i} skipped: {e}")
 
@@ -70,6 +72,7 @@ def ocr_diagnose():
 async def upload_pdf(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
+    loi_version: str = Form("12-90"),
 ):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted.")
@@ -78,7 +81,7 @@ async def upload_pdf(
     if len(pdf_bytes) < 1000:
         raise HTTPException(status_code=400, detail="PDF seems too small or empty.")
 
-    background_tasks.add_task(process_and_store, pdf_bytes, file.filename)
+    background_tasks.add_task(process_and_store, pdf_bytes, file.filename, loi_version)
 
     return {
         "message": f"'{file.filename}' received. OCR running in background.",

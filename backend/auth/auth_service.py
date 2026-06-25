@@ -206,6 +206,36 @@ def mark_user_verified(email: str):
         cur.close()
         conn.close()
 
+def update_user_profile(user_id: int, first_name: str, last_name: str):
+    """Met à jour le prénom et le nom de l'utilisateur."""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """UPDATE users 
+               SET first_name = %s, last_name = %s, name = %s 
+               WHERE id = %s
+               RETURNING id, email, first_name, last_name, name""",
+            (first_name, last_name, f"{first_name} {last_name}".strip(), user_id)
+        )
+        user = cur.fetchone()
+        conn.commit()
+        if not user:
+            return None
+        return {
+            "id": user[0],
+            "email": user[1],
+            "first_name": user[2],
+            "last_name": user[3],
+            "name": user[4]
+        }
+    except Exception as e:
+        print(f"Erreur lors de la mise à jour du profil: {e}")
+        conn.rollback()
+        return None
+    finally:
+        cur.close()
+        conn.close()
 
 def login_user(email: str, password: str):
     """Connecte un utilisateur avec email et mot de passe."""
@@ -293,6 +323,8 @@ def create_jwt_token(user_data: dict):
         "sub": str(user_data["id"]),
         "email": user_data["email"],
         "name": user_data.get("name") or f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip(),
+        "first_name": user_data.get("first_name", ""),
+        "last_name": user_data.get("last_name", ""),
         "exp": expiration
     }
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")

@@ -14,8 +14,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Khenifra Urban Chatbot API",
-    description="Chatbot pour les plaintes urbaines - Loi 12-90",
+    title="Assistant Urbanisme API",
+    description="Chatbot pour les plaintes urbaines - Lois 12-90 et 25-90",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -35,5 +35,5 @@ app.include_router(ocr_router, prefix="/api/ocr", tags=["OCR"])
 
 @app.get("/")
 def health():
-    return {"status": "ok", "project": "Khenifra Urban Chatbot", "loi": "12-90"}
+    return {"status": "ok", "project": "Assistant Urbanisme", "loi": "12-90 / 25-90"}
 

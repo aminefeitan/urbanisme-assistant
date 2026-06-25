@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr
 from auth.auth_service import (
     generate_otp, send_otp_email, create_otp_record, verify_otp,
     create_or_get_user, create_jwt_token,
-    register_user, login_user, mark_user_verified
+    register_user, login_user, mark_user_verified, update_user_profile
 )
 from auth.auth_middleware import get_current_user
 
@@ -31,6 +31,10 @@ class SendOtpRequest(BaseModel):
 class VerifyOtpRequest(BaseModel):
     email: EmailStr
     code: str
+
+class UpdateProfileRequest(BaseModel):
+    first_name: str
+    last_name: str
 
 
 # --- New Password-Based Endpoints ---
@@ -139,3 +143,18 @@ def verify_otp_endpoint(req: VerifyOtpRequest):
 def get_me(user: dict = Depends(get_current_user)):
     """Retourne l'utilisateur actuellement connecté."""
     return {"user": user}
+
+@router.put("/profile")
+def update_profile(req: UpdateProfileRequest, user: dict = Depends(get_current_user)):
+    """Met à jour le prénom et nom de l'utilisateur."""
+    user_data = update_user_profile(user["id"], req.first_name, req.last_name)
+    if not user_data:
+        raise HTTPException(status_code=500, detail="Erreur lors de la mise à jour du profil.")
+    
+    token = create_jwt_token(user_data)
+    
+    return {
+        "token": token,
+        "user": user_data,
+        "message": "Profil mis à jour avec succès."
+    }

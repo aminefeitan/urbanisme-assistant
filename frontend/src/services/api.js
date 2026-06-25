@@ -23,9 +23,10 @@ export async function sendMessage(message, sessionId, signal, language = "ar") {
   return res.json(); // { response, session_id }
 }
 
-export async function uploadPDF(file) {
+export async function uploadPDF(file, loiVersion = "12-90") {
   const form = new FormData();
   form.append("file", file);
+  form.append("loi_version", loiVersion);
   
   const headers = {};
   const token = localStorage.getItem('authToken');
@@ -193,6 +194,19 @@ export async function getMe() {
   });
   if (!res.ok) {
     throw new Error("Not logged in");
+  }
+  return res.json();
+}
+
+export async function updateProfile(firstName, lastName) {
+  const res = await fetch(`${BASE}/auth/profile`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ first_name: firstName, last_name: lastName }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Erreur lors de la mise à jour.");
   }
   return res.json();
 }

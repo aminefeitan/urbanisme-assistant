@@ -1,4 +1,4 @@
-# 🏛️ Khenifra Urban Chatbot — Loi 12-90
+# 🏛️ Assistant Urbanisme — Loi 12-90
 
 Chatbot intelligent pour les plaintes urbanistiques avec support vocal et authentification.
 Stack: FastAPI + Mistral API + PostgreSQL/pgvector + Tesseract OCR + Faster-Whisper + React + Tailwind CSS
@@ -131,7 +131,7 @@ Si la loi change: Reset dans le panel, puis re-upload le nouveau PDF.
 
 ## Structure du projet
 
-  khenifra-urban-chatbot/
+  assistant-urbanisme/
   backend/
     main.py                  <- FastAPI entry point
     requirements.txt         <- Python 3.13 compatible
