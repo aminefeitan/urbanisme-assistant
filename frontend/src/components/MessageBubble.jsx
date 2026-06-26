@@ -104,6 +104,27 @@ export default function MessageBubble({ role, content, onEdit, onDelete, languag
             </button>
           </div>
         )}
+
+        {!isUser && (
+          <div className={`flex gap-1.5 absolute -bottom-[18px] ${isRTL ? "right-4" : "left-4"} bg-surface border border-appBorder p-1 rounded-lg opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.1)] pointer-events-none group-hover:pointer-events-auto`}>
+            <button
+              onClick={handleCopy}
+              className={`bg-surface2 border-none text-muted w-[26px] h-[26px] rounded-md flex items-center justify-center cursor-pointer transition-colors hover:bg-appBorder hover:text-appText ${copied ? "!text-emerald-600 !bg-emerald-100 dark:!bg-emerald-900/30" : ""}`}
+              title={copied ? "Copié !" : "Copier"}
+            >
+              {copied ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5"></path>
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              )}
+            </button>
+          </div>
+        )}
       </div>
       {isUser && (
         <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 border-none text-white shadow-[0_4px_10px_rgba(56,189,248,0.2)] bg-gradient-to-br from-sky-400 to-sky-600">
