@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import translations from "../translations";
+import { getPublicContent } from "../services/api";
+import { Loader2 } from "lucide-react";
 
 export default function SettingsPage({
   isLightMode,
@@ -10,8 +12,26 @@ export default function SettingsPage({
 }) {
   // null = main settings, "privacy" | "terms" | "about" = sub-page
   const [activePage, setActivePage] = useState(null);
+  const [contentCache, setContentCache] = useState({});
+  const [loadingContent, setLoadingContent] = useState(false);
   const t = translations[language] || translations.ar;
   const isRTL = language === "ar";
+
+  const handleOpenPage = async (pageId) => {
+    setActivePage(pageId);
+    if (!contentCache[pageId]) {
+      setLoadingContent(true);
+      try {
+        const keyMap = { privacy: "privacy_policy", terms: "terms", about: "about" };
+        const data = await getPublicContent(keyMap[pageId]);
+        setContentCache(prev => ({ ...prev, [pageId]: data }));
+      } catch (err) {
+        console.error("Failed to load content:", err);
+      } finally {
+        setLoadingContent(false);
+      }
+    }
+  };
 
   const ProfessionalTextRenderer = ({ text, isRTL }) => {
     const blocks = text.split('\n\n');
@@ -188,8 +208,20 @@ export default function SettingsPage({
         {/* Sub-page Content */}
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 scrollbar-thin scrollbar-thumb-muted">
           <div className="max-w-[640px] mx-auto">
-            <div className="bg-surface2/50 border border-appBorder/50 rounded-2xl p-5 sm:p-8 shadow-sm">
-              <ProfessionalTextRenderer text={config.content} isRTL={isRTL} />
+            <div className="bg-surface2/50 border border-appBorder/50 rounded-2xl p-5 sm:p-8 shadow-sm min-h-[200px] flex flex-col">
+              {loadingContent ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-accent2 opacity-50" />
+                </div>
+              ) : (
+                <ProfessionalTextRenderer 
+                  text={
+                    (contentCache[activePage] && (isRTL ? contentCache[activePage].content_ar : contentCache[activePage].content_fr)) 
+                      || config.content
+                  } 
+                  isRTL={isRTL} 
+                />
+              )}
             </div>
           </div>
         </div>
@@ -302,7 +334,7 @@ export default function SettingsPage({
           <div className="bg-surface border border-appBorder rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent2/30">
             <button
               className="w-full px-5 py-4 flex items-center gap-4 bg-transparent border-none cursor-pointer text-left"
-              onClick={() => setActivePage("privacy")}
+              onClick={() => handleOpenPage("privacy")}
               dir={isRTL ? "rtl" : "ltr"}
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-emerald-500 shrink-0">
@@ -321,7 +353,7 @@ export default function SettingsPage({
           <div className="bg-surface border border-appBorder rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent2/30">
             <button
               className="w-full px-5 py-4 flex items-center gap-4 bg-transparent border-none cursor-pointer text-left"
-              onClick={() => setActivePage("terms")}
+              onClick={() => handleOpenPage("terms")}
               dir={isRTL ? "rtl" : "ltr"}
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center text-violet-500 shrink-0">
@@ -340,7 +372,7 @@ export default function SettingsPage({
           <div className="bg-surface border border-appBorder rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent2/30">
             <button
               className="w-full px-5 py-4 flex items-center gap-4 bg-transparent border-none cursor-pointer text-left"
-              onClick={() => setActivePage("about")}
+              onClick={() => handleOpenPage("about")}
               dir={isRTL ? "rtl" : "ltr"}
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500/20 to-pink-500/20 flex items-center justify-center text-rose-500 shrink-0">

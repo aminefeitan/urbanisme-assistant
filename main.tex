@@ -1,0 +1,1309 @@
+\documentclass[12pt,a4paper]{report}
+% ===================== PACKAGES =====================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,french]{babel}
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm,headheight=15pt]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{longtable}
+\usepackage{ragged2e}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, linkcolor=darkblue, citecolor=darkblue, urlcolor=darkblue, bookmarks=true]{hyperref}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage[none]{hyphenat}
+\sloppy
+
+% ===================== COULEURS =====================
+\definecolor{darkblue}{RGB}{20,55,110}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{accentgray}{RGB}{120,120,120}
+\definecolor{tableheader}{RGB}{20,55,110}
+\definecolor{tableroweven}{RGB}{237,242,251}
+\definecolor{tablerowgreen}{RGB}{210,240,220}
+\definecolor{tablerowodd}{RGB}{255,255,255}
+\definecolor{rowalt}{RGB}{248,250,253}
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codeborder}{RGB}{220,220,220}
+
+% ===================== STYLE DES TITRES =====================
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\Huge\color{darkblue}}
+  {\filright\Large\textsc{Chapitre \thechapter}}
+  {10pt}
+  {\Huge}
+\titlespacing*{\chapter}{0pt}{20pt}{30pt}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{darkblue}}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{darkblue!80}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{darkblue!70}}{\thesubsubsection}{1em}{}
+
+% ===================== EN-TETES / PIEDS DE PAGE =====================
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.2pt}
+\setlength{\headheight}{15pt}
+\fancyhead[L]{\small\textit{Plateforme Intelligente d'Assistance Urbanistique}}
+\fancyhead[R]{\small\thepage}
+\fancyfoot[C]{\small ENSIASD -- Année universitaire 2025/2026}
+
+% ===================== COMMANDES POUR EMPLACEMENTS =====================
+\newcommand{\placeholderbox}[3]{%
+\begin{center}
+\begin{tikzpicture}
+\draw[line width=1.1pt, dash pattern=on 8pt off 5pt, color=accentgray, fill=lightgray, rounded corners=4pt] (0,0) rectangle (#1,#2);
+\draw[line width=0.6pt, color=accentgray!60] (0,0) -- (#1,#2);
+\draw[line width=0.6pt, color=accentgray!60] (0,#2) -- (#1,0);
+\node[align=center, text width=0.85\linewidth, font=\itshape, color=accentgray] at ({#1/2},{#2/2}) {#3};
+\end{tikzpicture}
+\end{center}%
+}
+
+\newcommand{\logobox}[2]{%
+\begin{tikzpicture}
+\draw[line width=1pt, dash pattern=on 6pt off 4pt, color=accentgray, fill=lightgray, rounded corners=3pt] (0,0) rectangle (#1,#1);
+\node[align=center, text width=0.8*#1 cm, font=\itshape\small, color=accentgray] at ({#1/2},{#1/2}) {#2};
+\end{tikzpicture}%
+}
+
+% ===================== STYLE DE CODE =====================
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.95}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% ===================== INFORMATIONS =====================
+\newcommand{\nometudiant}{RACHIDI Amine}
+\newcommand{\nomencadrant}{Pr. KARBIL Loubna}
+\newcommand{\nomencadrantentreprise}{M. ABBAD Yassine}
+\newcommand{\titreprojet}{Analyse, Conception et Réalisation d'une Plateforme Intelligente d'Assistance Urbanistique Basée sur l'Intelligence Artificielle}
+\newcommand{\soustitreprojet}{Cas d'étude~: Assistant Juridique Intelligent --- Lois 12-90 \& 25-90 (Khenifra)}
+\newcommand{\etablissement}{École Nationale Supérieure de l'Intelligence Artificielle et des Sciences de Données}
+\newcommand{\filiere}{Ingénierie Logicielle}
+\newcommand{\anneeuniv}{2025 / 2026}
+
+% =====================================================
+\begin{document}
+\selectlanguage{french}
+
+% ===================== PAGE DE GARDE =====================
+\pagestyle{empty}
+\begin{titlepage}
+\begin{center}
+
+\begin{minipage}{0.45\textwidth}
+\centering
+\includegraphics[width=10cm, height=3.5cm,keepaspectratio]{photos/logo-ensiasd.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\raggedleft
+\includegraphics[width=5.5cm, height=5.5cm,keepaspectratio]{photos/logo-fr.png}
+\end{minipage}
+
+\vspace{0.7cm}
+{\large \scshape \etablissement}\\[0.3cm]
+{\large Filière~: \filiere}
+
+\vspace{0.8cm}
+\rule{\linewidth}{0.5mm}\\[0.4cm]
+{\LARGE \bfseries \titreprojet}\\[0.4cm]
+\rule{\linewidth}{0.5mm}
+
+\vspace{0.5cm}
+{\large \itshape \soustitreprojet}
+
+\vspace{0.8cm}
+{\Large \textbf{Rapport de Projet}}
+
+\vspace{0.8cm}
+\begin{minipage}{0.45\textwidth}
+\begin{flushleft}\large
+\emph{Réalisé par~:}\\
+\textbf{\nometudiant}
+\end{flushleft}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\begin{flushright}\large
+\emph{Encadrante académique~:}\\
+\textbf{\nomencadrant}\\[0.2cm]
+\emph{Encadrant professionnel~:}\\
+\textbf{\nomencadrantentreprise}
+\end{flushright}
+\end{minipage}
+
+\vspace{1cm}
+% L'emplacement pour l'image sur la page de garde a été supprimé pour un rendu plus professionnel.
+
+\vfill
+{\large Année Universitaire~: \textbf{\anneeuniv}}
+\end{center}
+\end{titlepage}
+\pagestyle{fancy}
+
+% ===================== PAGINATION ROMAINE =====================
+\pagenumbering{Roman}
+
+% ===================== REMERCIEMENTS =====================
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+
+Au terme de ce projet, je tiens à exprimer ma profonde gratitude à toutes les personnes qui ont contribué, de quelque manière que ce soit, à sa réalisation.
+
+Je tiens tout d'abord à remercier chaleureusement mon encadrante académique, \textbf{\nomencadrant}, pour sa disponibilité, ses conseils avisés, sa rigueur scientifique et son accompagnement constant durant toutes les étapes de ce travail. Ses orientations méthodologiques et son écoute attentive ont été déterminantes pour la bonne conduite de ce projet.
+
+J'exprime également ma sincère gratitude à mon encadrant professionnel, \textbf{\nomencadrantentreprise}, de l'Agence Urbaine de Khenifra, pour m'avoir accueilli, orienté et fait bénéficier de son expertise métier, ainsi que pour les moyens mis à ma disposition pour la réussite de ce travail.
+
+Mes remerciements vont également à l'ensemble du corps professoral et administratif de \textbf{\etablissement}, pour la qualité de la formation dispensée au sein de la filière \textbf{\filiere}, qui m'a permis d'acquérir les compétences techniques nécessaires à la réalisation de ce projet.
+
+Je remercie aussi les membres du jury qui me feront l'honneur d'évaluer ce travail, pour le temps qu'ils consacreront à l'examen de ce rapport et pour leurs remarques constructives.
+
+Enfin, je remercie ma famille et mes proches pour leur soutien moral et leurs encouragements tout au long de la réalisation de ce projet.
+
+% ===================== RESUME=====================
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+
+Ce projet a consisté en l'\textbf{analyse, la conception, la modélisation et la réalisation} d'une plateforme intelligente d'assistance urbanistique, fondée sur les technologies d'intelligence artificielle et de recherche sémantique. La plateforme accompagne les citoyens de l'Agence Urbaine de Khenifra dans la compréhension et le traitement de leurs plaintes liées à l'urbanisme, en s'appuyant sur les lois marocaines \textbf{12-90} (urbanisme) et \textbf{25-90} (lotissements, groupes d'habitations et morcellement).
+
+La solution se présente sous la forme d'un \textit{chatbot} conversationnel bilingue (arabe~/ français), doté d'un support vocal (Speech-to-Text via Faster-Whisper), d'un système d'authentification sécurisé (JWT, bcrypt, OTP par email), d'un mode invité, d'une gestion persistante de l'historique des conversations et d'un mode sombre. Le moteur d'intelligence artificielle repose sur une architecture de type \textit{Retrieval-Augmented Generation} (RAG), combinant les embeddings \texttt{mistral-embed} (1024 dimensions), la recherche vectorielle par similarité cosinus via \textbf{pgvector}, et la génération de réponses contextualisées avec citations d'articles par le modèle \texttt{mistral-small-latest}.
+
+\vspace{0.4cm}
+\noindent\textbf{Mots-clés~:} Urbanisme, Loi 12-90, Loi 25-90, Khenifra, Chatbot intelligent, IA, RAG, OCR, Speech-to-Text, FastAPI, React, Tailwind CSS, PostgreSQL, pgvector, Mistral AI, JWT, Faster-Whisper.
+
+
+
+% ===================== TABLES =====================
+\tableofcontents
+\listoffigures
+\listoftables
+
+
+% ===================== PAGINATION ARABE =====================
+\clearpage
+\newcounter{savepage}
+\setcounter{savepage}{\value{page}}
+\pagenumbering{arabic}
+\setcounter{page}{\value{savepage}}
+
+% =====================================================
+% INTRODUCTION GENERALE
+% =====================================================
+\chapter*{Introduction Générale}
+\addcontentsline{toc}{chapter}{Introduction Générale}
+\markboth{Introduction Générale}{}
+
+La transformation digitale des services publics constitue aujourd'hui un axe stratégique majeur pour les administrations marocaines, dans le cadre de la modernisation de l'action publique et du renforcement de la relation entre l'administration et le citoyen. Le secteur de l'urbanisme, encadré par les lois marocaines \textbf{12-90} (relative à l'urbanisme) et \textbf{25-90} (relative aux lotissements, groupes d'habitations et morcellement), demeure un domaine où l'accès à l'information juridique reste complexe pour le citoyen non averti~: textes de loi volumineux, vocabulaire technique et juridique, procédures administratives multiples, barrières linguistiques.
+
+C'est dans ce contexte que s'inscrit le présent projet, qui vise à concevoir, modéliser et réaliser une \textbf{plateforme d'assistance urbanistique intelligente} pour la commune de Khenifra. Cette plateforme se distingue par une approche complète et moderne~: interface bilingue arabe/français avec support vocal, authentification sécurisée par OTP, moteur de recherche sémantique RAG basé sur les embeddings Mistral, et citations obligatoires des articles sources pour limiter les hallucinations.
+
+Le présent rapport est structuré en six chapitres~:
+
+\begin{itemize}[label=\textbullet]
+    \item Le \textbf{premier chapitre} présente le cadre général du projet~: contexte, problématique, étude de l'existant, objectifs et méthodologie~;
+    \item Le \textbf{deuxième chapitre} est consacré à l'analyse des besoins fonctionnels et non fonctionnels, aux acteurs et aux cas d'utilisation~;
+    \item Le \textbf{troisième chapitre} détaille la conception~: architecture globale, architecture RAG, diagrammes UML (classes, séquence)~;
+    \item Le \textbf{quatrième chapitre} présente les technologies utilisées~;
+    \item Le \textbf{cinquième chapitre} aborde les aspects de sécurité de la plateforme~;
+    \item Le \textbf{sixième chapitre} présente la réalisation, les tests, les difficultés rencontrées et les perspectives.
+\end{itemize}
+
+Une section sur les apports personnels précède la conclusion générale.
+
+% =====================================================
+% CHAPITRE 1 : CADRE GENERAL
+% =====================================================
+\chapter{Cadre Général du Projet}
+\label{chap:cadre}
+
+\section{Introduction}
+
+Ce premier chapitre présente le cadre général du projet~: contexte, problématique, étude comparative des solutions existantes, objectifs et méthodologie de travail.
+
+\section{Présentation de l'organisme d'accueil}
+
+Ce projet a été réalisé au sein de l'Agence Urbaine de Khenifra, sous la supervision de M. ABBAD Yassine. Cet organisme a pour mission, entre autres, la gestion du développement urbain, la délivrance des autorisations d'urbanisme et le traitement des requêtes citoyennes liées à l'application des lois 12-90 et 25-90. C'est dans ce cadre opérationnel réel que le besoin d'un assistant virtuel intelligent, capable d'orienter les citoyens, a été identifié.
+
+\section{Contexte général}
+
+Les lois marocaines \textbf{12-90} et \textbf{25-90} constituent les piliers juridiques de l'urbanisme au Maroc. La loi 12-90 régit l'occupation des sols, les autorisations de construire et les documents d'urbanisme (SDAU, Plans d'Aménagement), tandis que la loi 25-90 encadre les lotissements, groupes d'habitations et morcellements. Ensemble, elles définissent les droits et obligations des citoyens ainsi que les sanctions en cas d'infraction.
+
+Dans l'Agence Urbaine de \textbf{Khenifra}, de nombreux citoyens rencontrent des difficultés pour~:
+\begin{itemize}[label=\textbullet]
+    \item comprendre les articles applicables à leur situation urbanistique~;
+    \item connaître la procédure exacte pour déposer une plainte ou une réclamation~;
+    \item accéder à une information fiable et compréhensible dans leur langue (arabe ou français).
+\end{itemize}
+
+\section{Problématique}
+
+\begin{quote}
+\itshape «~Comment concevoir une plateforme logicielle capable d'analyser automatiquement les textes des lois 12-90 et 25-90, de les indexer de manière intelligente, et de fournir aux citoyens des réponses fiables, bilingues et contextualisées concernant leurs plaintes urbanistiques, tout en garantissant une architecture logicielle robuste, sécurisée et évolutive~?~»
+\end{quote}
+
+\section{Objectifs du projet}
+
+\begin{enumerate}[label=\arabic*.]
+    \item Réaliser une analyse complète des besoins fonctionnels et non fonctionnels~;
+    \item Modéliser le système à travers les diagrammes UML (cas d'utilisation, classes, séquence)~;
+    \item Concevoir une architecture RAG combinant embeddings sémantiques, recherche vectorielle pgvector et génération de réponses Mistral AI~;
+    \item Implémenter un système d'authentification sécurisé (JWT, bcrypt, OTP par email)~;
+    \item Développer une interface bilingue (arabe RTL / français) avec support vocal (Faster-Whisper)~;
+    \item Mettre en place un pipeline OCR bilingue (Tesseract) pour l'extraction des articles des lois PDF~;
+    \item Effectuer les tests et mesures de performance de la solution.
+\end{enumerate}
+
+\section{Étude de l'existant}
+\label{sec:existant}
+
+Avant de présenter la solution proposée, il convient de la situer par rapport aux outils et plateformes existants. Le tableau~\ref{tab:existant} présente cette analyse comparative selon quatre axes~: type de solution, points forts, limites vis-à-vis de la problématique, et adéquation au contexte des lois marocaines.
+
+\begin{table}[H]
+\centering
+\caption{Analyse comparative avec les solutions existantes}
+\label{tab:existant}
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\linewidth}{%
+  >{\columncolor{tablerowodd}\bfseries\small}p{2.5cm}
+  >{\columncolor{tablerowodd}\small}p{2.3cm}
+  >{\columncolor{tablerowodd}\small}X
+  >{\columncolor{tablerowodd}\small}X
+}
+\arrayrulecolor{darkblue}
+\hline
+\rowcolor{tableheader}
+\textcolor{white}{\textbf{Solution}} &
+\textcolor{white}{\textbf{Type}} &
+\textcolor{white}{\textbf{Points forts}} &
+\textcolor{white}{\textbf{Limites pour notre contexte}} \\
+\hline
+\rowcolor{tableroweven}
+ChatGPT &
+IA généraliste &
+Compréhension avancée du langage naturel, multilingue, interface intuitive &
+Non spécialisé en droit marocain de l'urbanisme~; risque élevé d'hallucinations sur les lois 12-90/25-90 \\
+\hline
+\rowcolor{tablerowodd}
+Gemini &
+IA généraliste &
+Modèle multimodal performant, bonnes capacités de synthèse &
+Absence de connaissance précise des lois 12-90/25-90 et des procédures locales de Khenifra \\
+\hline
+\rowcolor{tableroweven}
+Claude &
+IA généraliste &
+Excellentes capacités de raisonnement et de rédaction structurée &
+Accès au corpus juridique marocain limité sans configuration dédiée~; non adapté aux plaintes locales \\
+\hline
+\rowcolor{tablerowodd}
+Assistants juridiques en ligne &
+Outil juridique généraliste &
+Couvrent plusieurs domaines du droit, accessibles en ligne &
+Non focalisés sur le droit marocain de l'urbanisme~; absence d'intégration avec les lois 12-90/25-90 \\
+\hline
+\rowcolor{tableroweven}
+Portails administratifs marocains &
+Service public numérique &
+Sources officielles et fiables, couverture nationale &
+Interfaces peu conviviales, aucune réponse conversationnelle, nécessitent une bonne maîtrise administrative \\
+\hline
+\rowcolor{tablerowgreen}
+\textbf{Plateforme proposée} &
+\textbf{Chatbot spécialisé (RAG)} &
+\textbf{Spécialisée lois 12-90 et 25-90, RAG avec citations, bilingue (ar/fr), support vocal, authentification OTP} &
+\textbf{Domaine limité au corpus indexé~; nécessite une indexation initiale des PDFs officiels} \\
+\hline
+\end{tabularx}
+\end{table}
+
+Cette analyse met en évidence un manque réel~: aucune solution existante ne combine à la fois la spécialisation sur les lois marocaines de l'urbanisme, le support bilingue arabe/français, le support vocal et une interface conversationnelle sécurisée. La plateforme proposée comble ce vide.
+
+\section{Méthodologie de travail}
+
+Pour mener à bien ce projet, nous avons adopté une démarche de génie logiciel itérative~:
+
+\begin{enumerate}[label=\textbf{Phase \arabic*~:}]
+    \item \textbf{Analyse} -- recueil des exigences, identification des acteurs, étude de l'existant~;
+    \item \textbf{Conception} -- modélisation UML, architecture globale et architecture RAG~;
+    \item \textbf{Choix technologique} -- sélection des outils, frameworks et langages~;
+    \item \textbf{Implémentation} -- développement du backend, frontend, base de données et modules spécialisés~;
+    \item \textbf{Tests et validation} -- vérification fonctionnelle, mesures de performance.
+\end{enumerate}
+
+\section{Conclusion}
+
+Ce chapitre a posé le cadre général du projet, présenté la problématique, l'étude comparative et les objectifs. Le chapitre suivant sera consacré à l'analyse détaillée des besoins.
+
+% =====================================================
+% CHAPITRE 2 : ANALYSE DES BESOINS
+% =====================================================
+\chapter{Analyse et Spécification des Besoins}
+\label{chap:analyse}
+
+\section{Introduction}
+
+L'analyse des besoins permet d'identifier les fonctionnalités attendues (besoins fonctionnels) et les contraintes de qualité (besoins non fonctionnels). Ce chapitre identifie également les acteurs du système et les modélise à travers le diagramme de cas d'utilisation.
+
+\section{Identification des acteurs}
+
+\begin{table}[H]
+\centering
+\caption{Identification des acteurs du système}
+\label{tab:acteurs}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\linewidth}{>{\bfseries\small}p{3.8cm} X}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}\textcolor{white}{\textbf{Acteur}} & \textcolor{white}{\textbf{Description et rôle}} \\
+\hline
+\rowcolor{tableroweven}
+Citoyen authentifié & Utilisateur inscrit disposant d'un compte. Accède au chat, à l'historique persistant (épinglage, suppression), au profil et aux paramètres. \\
+\hline
+\rowcolor{tablerowodd}
+Mode invité & Utilisateur non inscrit. Accède au chat sans historique persistant ni fonctionnalités personnalisées. \\
+\hline
+\rowcolor{tableroweven}
+Administrateur & Gère la base de connaissances (import OCR des lois 12-90/25-90), modère les utilisateurs (suppression des comptes non vérifiés) et administre le contenu dynamique de la plateforme (politiques, conditions). \\
+\hline
+\rowcolor{tablerowodd}
+Moteur IA (RAG) & Acteur logiciel~: moteur conversationnel (embeddings Mistral + pgvector + mistral-small). \\
+\hline
+\rowcolor{tableroweven}
+Service OCR & Module d'extraction automatique du texte des PDFs (Tesseract + Poppler/pdf2image). \\
+\hline
+\rowcolor{tablerowodd}
+Service Auth & Module de gestion des utilisateurs~: inscription, OTP, JWT, profil (bcrypt). \\
+\hline
+\rowcolor{tableroweven}
+Service STT & Module de reconnaissance vocale~: Speech-to-Text via Faster-Whisper. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Spécification des besoins fonctionnels}
+
+\begin{enumerate}[label=\textbf{BF\arabic*~:}]
+    \item L'utilisateur doit pouvoir \textbf{s'inscrire} avec email, mot de passe et nom, et vérifier son compte par un \textbf{code OTP} envoyé par email~;
+    \item L'utilisateur doit pouvoir \textbf{se connecter} avec ses identifiants et recevoir un \textbf{token JWT} pour les sessions suivantes~;
+    \item Un \textbf{mode invité} doit permettre l'accès au chat sans inscription, sans historique persistant~;
+    \item L'utilisateur doit pouvoir \textbf{poser une question en langage naturel} (arabe ou français) relative à une situation urbanistique~;
+    \item L'utilisateur doit pouvoir \textbf{dicter vocalement} sa question (via le microphone), convertie en texte par Faster-Whisper~;
+    \item Le système doit \textbf{détecter automatiquement la langue} du message (arabe, français ou darija) et répondre dans la même langue~;
+    \item Le système doit \textbf{rechercher sémantiquement} les articles pertinents des lois 12-90 et 25-90 dans la base vectorielle (pgvector, similarité cosinus $> 0.45$)~;
+    \item Le système doit \textbf{générer une réponse contextualisée} avec \textbf{citations obligatoires} des articles sources, limitant les hallucinations~;
+    \item L'utilisateur doit pouvoir \textbf{consulter, épingler et supprimer} ses conversations persistantes~;
+    \item L'utilisateur doit pouvoir \textbf{modifier son profil} (prénom, nom)~;
+    \item L'utilisateur doit pouvoir \textbf{basculer entre thème clair et sombre}~;
+    \item L'utilisateur doit pouvoir \textbf{changer la langue de l'interface} (arabe RTL / français)~;
+    \item L'administrateur doit pouvoir \textbf{importer un PDF} (loi 12-90 ou 25-90) et déclencher le pipeline OCR~;
+    \item Le système doit \textbf{extraire, segmenter et indexer} les articles des PDFs dans PostgreSQL/pgvector~;
+    \item L'administrateur doit disposer d'un \textbf{tableau de bord} détaillé avec des statistiques globales~;
+    \item L'administrateur doit pouvoir \textbf{gérer les utilisateurs} et supprimer les comptes non vérifiés~;
+    \item L'administrateur doit pouvoir \textbf{modifier le contenu textuel} de l'application (Politique de confidentialité, Conditions, À propos) avec effet immédiat sur l'interface publique.
+\end{enumerate}
+
+\section{Spécification des besoins non fonctionnels}
+
+\begin{enumerate}[label=\textbf{BNF\arabic*~:}]
+    \item \textbf{Performance}~: réponse au citoyen en quelques secondes~; recherche vectorielle en moins de 500~ms~;
+    \item \textbf{Sécurité}~: mots de passe hachés (bcrypt), sessions par JWT signé, codes OTP à durée limitée, clés API dans les variables d'environnement~;
+    \item \textbf{Fiabilité}~: les réponses doivent citer obligatoirement les articles sources~; le système signale explicitement quand l'information est absente du corpus~;
+    \item \textbf{Disponibilité}~: la plateforme doit être accessible 24h/24 et 7j/7~;
+    \item \textbf{Ergonomie}~: interface intuitive pour un public non technique, support RTL pour l'arabe~;
+    \item \textbf{Multilinguisme}~: interface et réponses en arabe, darija et français~;
+    \item \textbf{Maintenabilité}~: code modulaire (backend par couches API/Auth/Chat/OCR/DB), documenté, versionné sur Git~;
+    \item \textbf{Scalabilité}~: architecture 3-tiers découplée, capable de supporter plusieurs utilisateurs simultanés~;
+    \item \textbf{Portabilité}~: fonctionnement en environnement local (Windows) et déploiement futur sur serveur~;
+    \item \textbf{Évolutivité}~: possibilité d'indexer de nouvelles lois sans refonte de l'architecture.
+\end{enumerate}
+
+\section{Diagramme de cas d'utilisation général}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=14cm,height=20cm]{diagramms/use-case.png}
+\caption{Diagramme de cas d'utilisation général de la plateforme}
+\label{fig:uc-global}
+\end{figure}
+
+\subsection{Description des principaux cas d'utilisation}
+
+\begin{table}[H]
+\centering
+\caption{Description du cas d'utilisation «~Poser une question~»}
+\label{tab:uc-question}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{>{\bfseries\small}p{3.5cm} X}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{tableroweven} Acteur principal & Citoyen authentifié ou Mode invité \\
+\hline
+\rowcolor{tablerowodd} Objectif & Obtenir une réponse fiable, citée et contextualisée \\
+\hline
+\rowcolor{tableroweven} Pré-conditions & Base de connaissances indexée (au moins une loi chargée) \\
+\hline
+\rowcolor{tablerowodd} Scénario principal &
+\begin{minipage}[t]{\linewidth}
+\vspace{2pt}
+\begin{enumerate}[label=\arabic*., nosep, leftmargin=1.5em]
+    \item L'utilisateur saisit ou dicte sa question.
+    \item Le système génère un embedding via \texttt{mistral-embed}.
+    \item pgvector retrouve les articles similaires (cosinus $>0.45$).
+    \item \texttt{mistral-small-latest} génère la réponse avec citations.
+    \item La réponse est affichée avec les articles sources.
+\end{enumerate}
+\vspace{2pt}
+\end{minipage} \\
+\hline
+\rowcolor{tableroweven} Post-conditions & Question et réponse enregistrées dans l'historique (si authentifié) \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Description du cas d'utilisation «~Authentification avec OTP~»}
+\label{tab:uc-auth}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{>{\bfseries\small}p{3.5cm} X}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{tableroweven} Acteur principal & Citoyen (nouvel utilisateur) \\
+\hline
+\rowcolor{tablerowodd} Objectif & Créer un compte sécurisé et l'activer par OTP \\
+\hline
+\rowcolor{tableroweven} Pré-conditions & Adresse email valide, configuration SMTP active \\
+\hline
+\rowcolor{tablerowodd} Scénario principal &
+\begin{minipage}[t]{\linewidth}
+\vspace{2pt}
+\begin{enumerate}[label=\arabic*., nosep, leftmargin=1.5em]
+    \item L'utilisateur remplit le formulaire (email, mot de passe, nom/prénom).
+    \item Le backend génère un code OTP et l'envoie par email (SMTP).
+    \item L'utilisateur saisit le code reçu.
+    \item Le backend vérifie le code (durée limitée).
+    \item Le compte est activé, un token JWT est retourné.
+\end{enumerate}
+\vspace{2pt}
+\end{minipage} \\
+\hline
+\rowcolor{tableroweven} Exceptions & OTP expiré, email invalide, code incorrect \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Description du cas d'utilisation «~Envoi vocal~»}
+\label{tab:uc-vocal}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{>{\bfseries\small}p{3.5cm} X}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{tableroweven} Acteur principal & Citoyen (authentifié ou invité) \\
+\hline
+\rowcolor{tablerowodd} Objectif & Poser une question par la voix sans saisie clavier \\
+\hline
+\rowcolor{tableroweven} Scénario principal &
+\begin{minipage}[t]{\linewidth}
+\vspace{2pt}
+\begin{enumerate}[label=\arabic*., nosep, leftmargin=1.5em]
+    \item L'utilisateur appuie sur le bouton micro dans l'InputBar.
+    \item L'audio est enregistré côté client.
+    \item Le fichier audio est envoyé à \texttt{/api/chat/voice}.
+    \item Faster-Whisper transcrit l'audio en texte.
+    \item Le texte transcrit est traité comme un message texte classique (RAG).
+\end{enumerate}
+\vspace{2pt}
+\end{minipage} \\
+\hline
+\rowcolor{tablerowodd} Post-conditions & Réponse affichée, question transcrite visible dans l'historique \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Conclusion}
+
+Ce chapitre a identifié les acteurs et spécifié les besoins fonctionnels (17 besoins) et non fonctionnels (10 exigences) du système. Le chapitre suivant sera consacré à la conception détaillée.
+
+% =====================================================
+% CHAPITRE 3 : CONCEPTION
+% =====================================================
+\chapter{Conception du Système}
+\label{chap:conception}
+
+\section{Introduction}
+
+La phase de conception définit la structure interne du système et le comportement dynamique de ses principaux scénarios. Elle repose sur l'architecture globale, l'architecture RAG, les diagrammes UML (classes, séquence) et le modèle de données.
+
+\section{Architecture globale de la solution}
+
+La plateforme repose sur une architecture \textbf{3-tiers} découplée~:
+
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Couche présentation (Frontend)}~: interface React 18 stylisée avec Tailwind CSS 3, bilingue (arabe RTL / français), avec routing, gestion d'état global, thème clair/sombre, support vocal et rendu Markdown des réponses~;
+    \item \textbf{Couche application (Backend)}~: API REST développée avec FastAPI (Python 3.13), structurée en modules~: Auth, Chat (RAG + STT), OCR et Base de données. Le serveur Uvicorn assure l'exécution asynchrone~;
+    \item \textbf{Couche données}~: PostgreSQL 16 avec l'extension pgvector, stockant les tables \texttt{users}, \texttt{otp\_codes}, \texttt{loi\_articles} (avec colonne vectorielle) et \texttt{chat\_messages} (historique).
+\end{itemize}
+
+Le système interagit avec l'\textbf{API Mistral AI} (service externe) pour les embeddings (\texttt{mistral-embed}, 1024 dimensions) et la génération de réponses (\texttt{mistral-small-latest}).
+
+\section{Architecture RAG (Retrieval-Augmented Generation)}
+\label{sec:rag}
+
+L'architecture RAG constitue le cœur du moteur d'intelligence artificielle de la plateforme. Elle garantit des réponses ancrées dans le texte officiel des lois, limitant les hallucinations grâce à la citation obligatoire des articles sources.
+
+\subsection{Stratégie de découpage (Chunking)}
+
+Avant d'être indexés, les documents juridiques subissent une étape cruciale de découpage (ou \textit{chunking}). Pour ce projet, nous avons opté pour une segmentation sémantique stricte \textbf{article par article}. Chaque article de loi extrait par l'OCR constitue un segment indépendant. Cette méthode préserve l'intégrité de l'unité de sens juridique et permet au système d'associer directement le vecteur généré aux métadonnées exactes (numéro de loi, numéro d'article). Cela optimise considérablement la pertinence de la recherche de similarité dans \texttt{pgvector} et facilite les citations lors de la génération.
+
+\subsection{Flux de traitement d'une question}
+
+\begin{enumerate}[label=\arabic*.]
+    \item L'\textbf{utilisateur} saisit ou dicte une question (arabe, darija ou français)~;
+    \item Si la question est vocale, \textbf{Faster-Whisper} la transcrit en texte (endpoint \texttt{/api/chat/voice})~;
+    \item Le backend génère un \textbf{embedding 1024-dim} via \texttt{mistral-embed}~;
+    \item \textbf{pgvector} effectue une recherche par similarité cosinus et retourne les articles les plus proches (seuil~$>~0.45$) des lois 12-90 et 25-90~;
+    \item Les articles récupérés et l'historique de la conversation constituent le \textbf{contexte} transmis à \texttt{mistral-small-latest}~;
+    \item Le modèle génère une réponse structurée avec \textbf{citations obligatoires} des articles sources et indique explicitement quand l'information est absente~;
+    \item La réponse est retournée au frontend, rendue en \textbf{Markdown} et enregistrée dans l'historique.
+\end{enumerate}
+
+
+
+\subsection{Paramètres techniques du moteur RAG}
+
+\begin{table}[H]
+\centering
+\caption{Paramètres techniques du moteur RAG}
+\label{tab:rag-params}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{>{\bfseries\small}p{4.5cm} X}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}\textcolor{white}{\textbf{Paramètre}} & \textcolor{white}{\textbf{Valeur / Description}} \\
+\hline
+\rowcolor{tableroweven} Modèle d'embedding & \texttt{mistral-embed} (1024 dimensions) \\
+\hline
+\rowcolor{tablerowodd} Métrique de similarité & Cosinus (pgvector) \\
+\hline
+\rowcolor{tableroweven} Seuil de pertinence & $> 0.45$ (articles retenus) \\
+\hline
+\rowcolor{tablerowodd} Modèle de génération & \texttt{mistral-small-latest} \\
+\hline
+\rowcolor{tableroweven} Détection de langue & Automatique (arabe, darija, français) \\
+\hline
+\rowcolor{tablerowodd} Anti-hallucination & Citation obligatoire des articles sources~; signalement explicite si absent du corpus \\
+\hline
+\rowcolor{tableroweven} Historique de conversation & Transmis au modèle pour maintenir le contexte conversationnel \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Diagramme de classes}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth, keepaspectratio]{diagramms/classe.png}
+\caption{Diagramme de classes de la plateforme}
+\label{fig:class-diagram}
+\end{figure}
+
+\subsection{Description des classes principales}
+
+\begin{table}[H]
+\centering
+\caption{Description des classes principales}
+\label{tab:classes}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{>{\bfseries\small}p{3.5cm} X}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}\textcolor{white}{\textbf{Classe}} & \textcolor{white}{\textbf{Rôle principal}} \\
+\hline
+\rowcolor{tableroweven} User & Utilisateur enregistré (email, mot de passe bcrypt, prénom, nom, statut de vérification). \\
+\hline
+\rowcolor{tablerowodd} OTPCode & Code OTP associé à un utilisateur (valeur, date d'expiration, statut d'utilisation). \\
+\hline
+\rowcolor{tableroweven} LoiArticle & Article de loi extrait (numéro, contenu texte, vecteur d'embedding 1024-dim, identifiant de loi~: 12-90 ou 25-90). \\
+\hline
+\rowcolor{tablerowodd} ChatMessage & Message de conversation (rôle utilisateur/assistant, contenu, horodatage, identifiant de conversation). \\
+\hline
+\rowcolor{tableroweven} AuthService & Gestion de l'inscription, OTP (génération + envoi SMTP), vérification JWT, bcrypt. \\
+\hline
+\rowcolor{tablerowodd} ChatEngine & Moteur RAG~: génération d'embedding, recherche vectorielle (pgvector), appel Mistral, gestion de l'historique. \\
+\hline
+\rowcolor{tableroweven} STTService & Speech-to-Text~: transcription audio via Faster-Whisper, détection de langue. \\
+\hline
+\rowcolor{tablerowodd} OCRProcessor & Pipeline OCR~: conversion PDF $\rightarrow$ images (pdf2image/Poppler), OCR Tesseract (fra+ara), segmentation en articles, indexation. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Relations entre les classes}
+
+\begin{itemize}[label=\textbullet]
+    \item Un \textbf{User} peut avoir plusieurs \textbf{OTPCode} (relation 1..* avec durée limitée)~;
+    \item Un \textbf{User} est associé à plusieurs \textbf{ChatMessage} (historique persistant)~;
+    \item Un \textbf{LoiArticle} est produit par l'\textbf{OCRProcessor} et consommé par le \textbf{ChatEngine}~;
+    \item Le \textbf{ChatEngine} utilise le \textbf{STTService} (pour les messages vocaux) et le client Mistral AI.
+\end{itemize}
+
+\section{Diagramme de séquence}
+
+Le diagramme de séquence ci-dessous illustre le scénario principal d'une question posée par l'utilisateur et traitée par le moteur RAG.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth, keepaspectratio]{diagramms/sequence.png}
+\caption{Diagramme de séquence --- Envoi d'une question texte (RAG)}
+\label{fig:seq-question}
+\end{figure}
+
+\section{Modèle de données}
+
+La base PostgreSQL comprend quatre tables principales créées automatiquement au démarrage par la fonction \texttt{init\_db()}~:
+
+\begin{itemize}[label=\textbullet]
+    \item \texttt{users}~: utilisateurs enregistrés (id, email, hashed\_password, first\_name, last\_name, is\_verified)~;
+    \item \texttt{otp\_codes}~: codes OTP (user\_id, code, expires\_at, is\_used)~;
+    \item \texttt{loi\_articles}~: articles des lois (id, article\_number, content, embedding VECTOR(1024), law\_id~: 12-90 ou 25-90)~;
+    \item \texttt{chat\_messages}~: historique (id, conversation\_id, user\_id, role, content, created\_at, is\_pinned).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth, keepaspectratio]{diagramms/mcd.png}
+\caption{Modèle conceptuel de données de la plateforme}
+\label{fig:mcd}
+\end{figure}
+
+\section{Conclusion}
+
+Ce chapitre a présenté l'architecture globale, l'architecture RAG détaillée (avec ses paramètres techniques), le diagramme de classes, le diagramme de séquence principal et le modèle de données. Ces éléments constituent la base de l'implémentation.
+
+% =====================================================
+% CHAPITRE 4 : TECHNOLOGIES UTILISEES
+% =====================================================
+\chapter{Technologies et Outils Utilisés}
+\label{chap:technos}
+
+\section{Introduction}
+
+La réalisation de cette plateforme a mobilisé un ensemble de technologies couvrant toute la chaîne applicative. Le tableau~\ref{tab:stack} synthétise l'ensemble de la stack technique. Des sections dédiées présentent les choix clés~: Tailwind CSS (migration du CSS classique), Faster-Whisper (support vocal) et JWT+OTP (authentification sécurisée).
+
+\clearpage
+\section{Synthèse de la stack technologique}
+
+\begin{table}[H]
+\centering
+\caption{Synthèse de la stack technologique}
+\label{tab:stack}
+\renewcommand{\arraystretch}{1.1}
+\small
+\begin{tabularx}{\linewidth}{>{\bfseries}p{3.8cm} p{3.6cm} X}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}
+\textcolor{white}{\textbf{Catégorie}} &
+\textcolor{white}{\textbf{Technologie}} &
+\textcolor{white}{\textbf{Rôle dans le projet}} \\
+\hline
+\rowcolor{tableroweven} Langage backend & Python 3.13 & Développement de la logique métier et de l'API \\
+\hline
+\rowcolor{tablerowodd} Framework backend & FastAPI 0.136.1 & Construction de l'API REST (routes Auth, Chat, OCR) \\
+\hline
+\rowcolor{tableroweven} Serveur d'application & Uvicorn 0.46.0 & Exécution asynchrone de l'application FastAPI \\
+\hline
+\rowcolor{tablerowodd} Modèle d'embedding & Mistral \texttt{mistral-embed} & Génération des vecteurs 1024-dim des articles et questions \\
+\hline
+\rowcolor{tableroweven} Modèle de génération & Mistral \texttt{mistral-small-latest} & Génération des réponses contextualisées avec citations \\
+\hline
+\rowcolor{tablerowodd} Base de données & PostgreSQL 16 & Stockage relationnel (users, OTP, articles, historique) \\
+\hline
+\rowcolor{tableroweven} Extension vectorielle & pgvector 0.4.2 & Stockage et recherche par similarité cosinus des embeddings \\
+\hline
+\rowcolor{tablerowodd} OCR & Tesseract OCR / pytesseract 0.3.13 & Extraction de texte bilingue (fra + ara) depuis les PDFs \\
+\hline
+\rowcolor{tableroweven} Conversion PDF & Poppler / pdf2image 1.17.0 & Conversion des pages PDF en images pour Tesseract \\
+\hline
+\rowcolor{tablerowodd} Speech-to-Text & Faster-Whisper 1.2.1 & Transcription vocale locale (arabe/français) \\
+\hline
+\rowcolor{tableroweven} Authentification & PyJWT 2.9.0 + passlib[bcrypt] 1.7.4 & Tokens JWT signés + hachage des mots de passe \\
+\hline
+\rowcolor{tablerowodd} Envoi OTP & SMTP (Gmail) & Envoi des codes OTP par email pour la vérification \\
+\hline
+\rowcolor{tableroweven} Traitement d'images & Pillow 11.3.0 & Traitement des images issues de Poppler \\
+\hline
+\rowcolor{tablerowodd} Validation données & Pydantic 2.11.4 & Validation et sérialisation des données API \\
+\hline
+\rowcolor{tableroweven} Framework Frontend & React 18 & Interface utilisateur conversationnelle (SPA) \\
+\hline
+\rowcolor{tablerowodd} Framework CSS & Tailwind CSS 3 & Stylisation utility-first, responsive, thème clair/sombre \\
+\hline
+\rowcolor{tableroweven} Rendu Markdown & react-markdown & Affichage des réponses formatées (listes, gras, citations) \\
+\hline
+\rowcolor{tablerowodd} Internationalisation & translations.js (i18n maison) & Interface bilingue arabe (RTL) / français \\
+\hline
+\rowcolor{tableroweven} Gestion de versions & Git \& GitHub & Versionnement du code source \\
+\hline
+\rowcolor{tablerowodd} Documentation API & Swagger / OpenAPI & Documentation interactive générée automatiquement par FastAPI \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Logos des technologies utilisées}
+
+\begin{minipage}{0.14\linewidth}\centering\includegraphics[width=2cm,height=2cm,keepaspectratio]{logos/python.png}\end{minipage}\hfill
+\begin{minipage}{0.14\linewidth}\centering\includegraphics[width=2cm,height=2cm,keepaspectratio]{logos/fastapi.png}\end{minipage}\hfill
+\begin{minipage}{0.14\linewidth}\centering\includegraphics[width=2cm,height=2cm,keepaspectratio]{logos/mistralAI.png}\end{minipage}\hfill
+\begin{minipage}{0.14\linewidth}\centering\includegraphics[width=2cm,height=2cm,keepaspectratio]{logos/postgresql.png}\end{minipage}\hfill
+\begin{minipage}{0.14\linewidth}\centering\includegraphics[width=2cm,height=2cm,keepaspectratio]{logos/react.png}\end{minipage}\hfill
+\begin{minipage}{0.14\linewidth}\centering\includegraphics[width=2cm,height=2cm,keepaspectratio]{logos/tailwind.png}\end{minipage}
+
+\section{Intégration de Tailwind CSS}
+\label{sec:tailwind}
+
+\textbf{Tailwind CSS 3} est un framework CSS utility-first intégré via \texttt{npm} (avec PostCSS et Autoprefixer). Il remplace le CSS classique (\texttt{App.css}) par des classes utilitaires directement dans les composants JSX. Cette migration apporte~:
+
+\begin{itemize}[label=\textbullet]
+    \item développement plus rapide~;
+    \item cohérence visuelle (système de tokens dans \texttt{tailwind.config.js})~;
+    \item responsive natif~;
+    \item support RTL pour l'arabe~;
+    \item bundle CSS optimisé (JIT)~;
+    \item mode sombre géré nativement via la classe \texttt{dark:}.
+\end{itemize}
+
+\section{Moteur de reconnaissance vocale (Faster-Whisper)}
+\label{sec:whisper}
+
+\textbf{Faster-Whisper 1.2.1} est une implémentation optimisée du modèle Whisper d'OpenAI, fonctionnant entièrement en local. Il est utilisé dans le module \texttt{chat/stt.py} pour la transcription des messages vocaux envoyés à l'endpoint \texttt{/api/chat/voice}. Ses avantages~:
+
+\begin{itemize}[label=\textbullet]
+    \item exécution locale (sans appel API externe)~;
+    \item support natif de l'arabe et du français~;
+    \item faible latence sur CPU~;
+    \item détection automatique de la langue.
+\end{itemize}
+
+\section{Système d'authentification et de sécurité (JWT + OTP)}
+\label{sec:auth}
+
+Le système d'authentification repose sur trois mécanismes complémentaires~:
+
+\begin{itemize}[label=\textbullet]
+    \item \textbf{bcrypt} (via \texttt{passlib})~: hachage sécurisé des mots de passe, jamais stockés en clair~;
+    \item \textbf{OTP par email} (SMTP Gmail)~: code à usage unique à durée limitée, envoyé à l'inscription pour vérifier l'adresse email. En mode développement, le code s'affiche dans la console~;
+    \item \textbf{JWT} (via \texttt{PyJWT})~: token signé retourné après connexion, vérifié à chaque requête protégée par le middleware \texttt{auth\_middleware.py}.
+\end{itemize}
+
+\section{Conclusion}
+
+Ce chapitre a présenté l'ensemble des technologies utilisées, avec une attention particulière aux choix structurants~: Tailwind CSS pour le frontend, Faster-Whisper pour le vocal, et JWT+OTP pour la sécurité. Le chapitre suivant détaille les mesures de sécurité mises en place.
+
+% =====================================================
+% CHAPITRE 5 : SECURITE
+% =====================================================
+\chapter{Sécurité de la Plateforme}
+\label{chap:securite}
+
+\section{Introduction}
+
+La sécurité est un axe central de cette plateforme, qui gère des données personnelles (comptes utilisateurs), des sessions authentifiées et des clés API. Ce chapitre présente les mesures de sécurité appliquées à chaque niveau de l'architecture.
+
+\section{Protection des clés API et des secrets}
+
+Toutes les informations sensibles (clé API Mistral, URL de base de données, secret JWT, identifiants SMTP) sont stockées exclusivement dans un fichier \texttt{.env}, chargé au démarrage via \texttt{python-dotenv}. Ce fichier est exclu du dépôt Git (\texttt{.gitignore}). Un fichier \texttt{.env.example} documenté est fourni à titre de modèle sans valeurs réelles.
+
+\section{Authentification et gestion des sessions}
+
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Mots de passe}~: hachés avec \textbf{bcrypt} (algorithme à coût adaptatif), jamais stockés ni transmis en clair~;
+    \item \textbf{OTP}~: codes à usage unique, à durée de vie limitée, stockés dans la table \texttt{otp\_codes} avec colonne \texttt{expires\_at} et \texttt{is\_used}~;
+    \item \textbf{JWT}~: tokens signés avec un secret fort (variable \texttt{JWT\_SECRET}), vérifiés à chaque requête protégée par le middleware \texttt{auth\_middleware.py}~;
+    \item \textbf{Mode invité}~: sessions sans persistance, aucune donnée personnelle collectée.
+\end{itemize}
+
+\section{Sécurité de la base de données}
+
+Les identifiants PostgreSQL sont transmis uniquement via la variable d'environnement \texttt{DATABASE\_URL}. Les requêtes sont effectuées via des paramètres préparés (via \texttt{psycopg2}), éliminant les risques d'injection SQL.
+
+\section{Validation des entrées}
+
+\begin{itemize}[label=\textbullet]
+    \item Les schémas \textbf{Pydantic} (v2) valident et sérialisent automatiquement toutes les données entrantes de l'API~;
+    \item Les fichiers uploadés (PDFs) sont vérifiés (type MIME, extension) avant traitement OCR~;
+    \item Les fichiers audio (messages vocaux) sont validés avant transcription Faster-Whisper~;
+    \item La taille des requêtes est limitée via \texttt{python-multipart}.
+\end{itemize}
+
+\section{Gestion des erreurs}
+
+FastAPI retourne des codes HTTP standardisés avec des messages d'erreur clairs, sans exposer de détails techniques internes (traces, chemins, etc.). Les journaux applicatifs permettent le diagnostic côté développeur sans compromettre la sécurité côté utilisateur.
+
+\section{Conclusion}
+
+Ce chapitre a présenté les mesures de sécurité couvrant la protection des secrets, l'authentification multi-couches (bcrypt + OTP + JWT), la sécurité de la base de données et la validation des entrées. Le chapitre suivant présente la réalisation, les tests et les perspectives.
+
+% =====================================================
+% CHAPITRE 6 : REALISATION ET TESTS
+% =====================================================
+\chapter{Réalisation, Tests et Perspectives}
+\label{chap:realisation}
+
+\section{Introduction}
+
+Ce chapitre présente l'environnement de développement, les interfaces réalisées, les résultats des tests et mesures de performance, les difficultés techniques résolues, ainsi que les perspectives d'évolution du projet.
+
+\section{Environnement de développement}
+
+La mise en place de l'environnement a nécessité l'installation et la configuration des éléments suivants~:
+
+\begin{itemize}[label=\textbullet]
+    \item \textbf{PostgreSQL 16} avec l'extension pgvector~;
+    \item \textbf{Tesseract OCR 5.x} avec les packs de langues français (\texttt{fra}) et arabe (\texttt{ara})~;
+    \item \textbf{Poppler} pour la conversion PDF $\rightarrow$ images (variable PATH)~;
+    \item \textbf{Faster-Whisper 1.2.1} pour la transcription vocale locale~;
+    \item \textbf{Node.js 20 LTS} pour le frontend React avec Tailwind CSS~;
+    \item Un environnement virtuel \textbf{Python 3.13 (venv)} pour les dépendances backend~;
+    \item Une \textbf{clé API Mistral} (gratuite)~;
+    \item Configuration \textbf{SMTP Gmail} (App Password) pour l'envoi des OTP.
+\end{itemize}
+
+\section{Présentation des interfaces réalisées}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/landing_page.png}}
+\caption{Landing Page (Page d'accueil)}
+\label{fig:ui-landing}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/inscription.png}}
+\caption{Page d'inscription}
+\label{fig:ui-inscription}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/verification_email.png}}
+\caption{Interface de vérification d'email (Saisie du code OTP)}
+\label{fig:ui-verification}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/auth_page.png}}
+\caption{Page d'authentification (OTP)}
+\label{fig:ui-auth}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/profil.png}}
+\caption{Profil de l'utilisateur}
+\label{fig:ui-profil}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/chat_clair.png}}
+\caption{Interface de chat --- thème clair}
+\label{fig:ui-chat-clair}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/chat_sombre.png}}
+\caption{Interface de chat --- thème sombre}
+\label{fig:ui-chat-sombre}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/sidebar.png}}
+\caption{Barre latérale (Sidebar)}
+\label{fig:ui-sidebar}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/parametres.png}}
+\caption{Page Paramètres (affichage dynamique du contenu édité par l'admin)}
+\label{fig:ui-parametres}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/admin_dashboard.png}}
+\caption{Tableau de bord Administrateur --- Statistiques générales}
+\label{fig:ui-admin-dash}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/admin_users.png}}
+\caption{Tableau de bord Administrateur --- Gestion des utilisateurs et suppression}
+\label{fig:ui-admin-users}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.2\linewidth, keepaspectratio]{interfaces/admin_content.png}}
+\caption{Tableau de bord Administrateur --- Édition du contenu dynamique de l'application}
+\label{fig:ui-admin-content}
+\end{figure}
+
+\section{Résultats des tests et mesures de performance}
+
+\subsection{Méthodologie d'évaluation}
+
+Afin de garantir la fiabilité et la crédibilité des métriques obtenues, un protocole de test rigoureux a été défini pour chaque composant clé de la plateforme~:
+
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Précision OCR} : Évaluée manuellement sur un échantillon aléatoire de 50 pages bilingues (extraites des Lois 12-90 et 25-90). Le texte généré par Tesseract a été comparé au document PDF original pour calculer le taux d'erreur de mots (WER - Word Error Rate), estimé à moins de 5\,\%.
+    \item \textbf{Temps de réponse RAG et recherche vectorielle} : La moyenne a été calculée sur une série automatisée de 100 requêtes variées posées à l'API. Le temps de génération correspond au délai avant la réception du premier jeton (TTFT - Time To First Token), mesuré via les journaux de requêtes FastAPI.
+    \item \textbf{Transcription vocale} : Évaluée sur un corpus de 30 échantillons audio de 10 secondes chacun (en arabe dialectal et en français), enregistrés dans des conditions de bruit ambiant réalistes.
+\end{itemize}
+
+Il convient de préciser que l'ensemble de ces tests (notamment l'OCR et la transcription vocale locale) a été réalisé sur un environnement matériel standard (Processeur Intel Core i7, 16 Go de RAM, sans accélération GPU dédiée), ce qui démontre l'efficacité des modèles choisis.
+
+\subsection{Synthèse des métriques}
+
+\begin{table}[H]
+\centering
+\caption{Résultats des tests et mesures de performance}
+\label{tab:tests}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\linewidth}{X >{\centering\arraybackslash\small}p{4.5cm}}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}
+\textcolor{white}{\textbf{Test / Module}} &
+\textcolor{white}{\textbf{Résultat / Métrique}} \\
+\hline
+\rowcolor{tableroweven} Extraction OCR bilingue (Tesseract, fra+ara) & Précision $\approx 95$\,\% \\
+\hline
+\rowcolor{tablerowodd} Temps d'indexation (OCR + embedding par page) & $\approx 8$ secondes / page \\
+\hline
+\rowcolor{tableroweven} Recherche vectorielle pgvector (cosinus) & Temps de réponse $< 500$\,ms \\
+\hline
+\rowcolor{tablerowodd} Génération RAG (question texte, API Mistral) & Temps moyen $\approx 2{,}1$ secondes \\
+\hline
+\rowcolor{tableroweven} Transcription vocale Faster-Whisper (CPU local) & Temps moyen $\approx 1{,}5$\,s / 10\,s d'audio \\
+\hline
+\rowcolor{tablerowodd} Authentification OTP (envoi email SMTP) & Délai de réception $< 5$ secondes \\
+\hline
+\rowcolor{tableroweven} API FastAPI (endpoints /auth, /chat, /ocr) & Disponibilité et fonctionnement conformes \\
+\hline
+\rowcolor{tablerowodd} Interface React --- thème clair/sombre & Conforme, sans rechargement de page \\
+\hline
+\rowcolor{tableroweven} Interface React --- passage arabe (RTL) / français & Conforme, bascule instantanée \\
+\hline
+\rowcolor{tablerowodd} Détection automatique de la langue de réponse & Conforme (arabe, darija, français) \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Difficultés techniques résolues}
+
+\begin{table}[H]
+\centering
+\caption{Difficultés techniques rencontrées et solutions apportées}
+\label{tab:difficultes}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\linewidth}{>{\small\bfseries}p{3.2cm} X X}
+\arrayrulecolor{darkblue}\hline
+\rowcolor{tableheader}
+\textcolor{white}{\textbf{Difficulté}} &
+\textcolor{white}{\textbf{Problème rencontré}} &
+\textcolor{white}{\textbf{Solution apportée}} \\
+\hline
+\rowcolor{tableroweven} OCR bilingue & Reconnaissance incorrecte de l'arabe par Tesseract avec la config par défaut & Configuration de Tesseract avec les packs combinés (\texttt{fra+ara}) \\
+\hline
+\rowcolor{tablerowodd} Compatibilité Python 3.13 & Incompatibilités de versions (numpy, Pillow, psycopg2) & Fixation des versions dans \texttt{requirements.txt} avec versions compatibles 3.13 \\
+\hline
+\rowcolor{tableroweven} Hallucinations du LLM & Le modèle générait des réponses inventées hors corpus & Architecture RAG + prompt engineering avec citation obligatoire des articles sources \\
+\hline
+\rowcolor{tablerowodd} Installation pgvector & Problème de compatibilité avec la version PostgreSQL & Activation manuelle (\texttt{CREATE EXTENSION vector}) après mise à jour de PostgreSQL \\
+\hline
+\rowcolor{tableroweven} Support RTL (arabe) & Affichage incorrect des textes arabes dans React & Gestion dynamique de l'attribut \texttt{dir="rtl"} dans le DOM via Tailwind et état React \\
+\hline
+\rowcolor{tablerowodd} Faster-Whisper sur CPU & Temps de transcription trop long en première utilisation & Chargement du modèle au démarrage du serveur (lazy init) et optimisation de la taille du modèle \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Perspectives d'évolution}
+
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Intégration d'autres lois}~: indexer de nouveaux textes réglementaires (arrêtés municipaux, lois complémentaires)~;
+    \item \textbf{Application mobile}~: développer une version React Native pour iOS et Android~;
+    \item \textbf{Amélioration du STT}~: passage à un modèle Whisper plus grand (medium ou large) pour une meilleure précision de l'arabe dialectal~;
+    \item \textbf{Tableau de bord administrateur}~: statistiques d'usage, questions fréquentes, taux de pertinence des réponses~;
+    \item \textbf{Déploiement cloud}~: conteneurisation Docker, hébergement sur serveur VPS ou cloud marocain~;
+    \item \textbf{Géolocalisation}~: module de localisation de la plainte sur une carte interactive.
+\end{itemize}
+
+\section{Conclusion}
+
+Ce chapitre a présenté la réalisation du système, les interfaces implémentées, les résultats des tests et performances, les difficultés résolues et les perspectives d'évolution.
+
+% =====================================================
+% APPORTS PERSONNELS
+% =====================================================
+\chapter*{Apports Personnels}
+\addcontentsline{toc}{chapter}{Apports Personnels}
+\markboth{Apports Personnels}{}
+
+Ce projet a constitué une expérience particulièrement enrichissante, tant sur le plan technique que méthodologique. Il m'a permis de développer et de consolider les compétences suivantes~:
+
+\begin{itemize}[label=\textbullet]
+    \item la \textbf{modélisation UML} (diagrammes de cas d'utilisation, de classes et de séquence) appliquée à un projet réel et complexe~;
+    \item le \textbf{développement backend} avec FastAPI et Python 3.13, incluant la conception d'une API REST modulaire en plusieurs couches (Auth, Chat, OCR, DB)~;
+    \item la \textbf{conception et la gestion de bases de données PostgreSQL}, ainsi que l'intégration de l'extension vectorielle \textbf{pgvector} pour la recherche sémantique~;
+    \item l'\textbf{intégration d'API d'intelligence artificielle} (Mistral AI) pour les embeddings et la génération de texte~;
+    \item la compréhension et la mise en œuvre des \textbf{architectures RAG} avec seuil de pertinence cosinus et anti-hallucination~;
+    \item le \textbf{développement d'un pipeline OCR bilingue} (Tesseract, fra+ara, Poppler) pour l'extraction automatique d'articles de loi~;
+    \item l'intégration du \textbf{Speech-to-Text} (Faster-Whisper) pour le support vocal dans une application web~;
+    \item la mise en place d'\textbf{un système d'authentification sécurisé} (JWT, bcrypt, OTP par email)~;
+    \item le \textbf{développement frontend} avec React 18 et \textbf{Tailwind CSS 3}, notamment la gestion du RTL pour l'arabe, du mode sombre et de l'internationalisation~;
+    \item des notions pratiques de \textbf{sécurité applicative} (variables d'environnement, validation Pydantic, middleware JWT).
+\end{itemize}
+
+Au-delà des compétences techniques, ce projet m'a permis d'appréhender la démarche complète de gestion d'un projet logiciel, depuis l'analyse des besoins jusqu'à la réalisation et aux tests, ainsi que l'importance de la documentation et de la rigueur méthodologique.
+
+% =====================================================
+% CONCLUSION GENERALE
+% =====================================================
+\chapter*{Conclusion Générale}
+\addcontentsline{toc}{chapter}{Conclusion Générale}
+\markboth{Conclusion Générale}{}
+
+Ce projet a consisté en l'\textbf{analyse, la conception, la modélisation et la réalisation} d'une plateforme intelligente d'assistance urbanistique, spécialisée sur les lois marocaines \textbf{12-90} et \textbf{25-90}, et dédiée aux citoyens de la commune de \textbf{Khenifra}.
+
+La solution réalisée dépasse le simple chatbot~: elle intègre un \textbf{moteur RAG} de haute précision (embeddings \texttt{mistral-embed} 1024-dim, recherche vectorielle cosinus via pgvector, génération avec citations obligatoires par \texttt{mistral-small-latest}), un \textbf{support vocal} bilingue (Faster-Whisper, arabe et français), un \textbf{système d'authentification multi-couches} (bcrypt, OTP email, JWT), une \textbf{interface bilingue} avec support RTL pour l'arabe, et un \textbf{pipeline OCR} automatisé pour l'alimentation de la base de connaissances.
+
+Les tests effectués confirment la faisabilité et la pertinence de l'approche~: précision OCR de 95\,\%, temps de réponse RAG de 2,1~secondes, recherche vectorielle en moins de 500~ms, transcription vocale en 1,5~seconde. Ces performances, obtenues en environnement de développement local, sont prometteuses pour un déploiement futur.
+
+Ce projet illustre le potentiel des technologies d'intelligence artificielle pour démocratiser l'accès à l'information juridique et administrative, en rendant les textes de loi accessibles à tous, dans leur langue, de manière instantanée et fiable.
+
+% =====================================================
+% BIBLIOGRAPHIE / WEBOGRAPHIE
+% =====================================================
+\chapter*{Bibliographie et Webographie}
+\addcontentsline{toc}{chapter}{Bibliographie et Webographie}
+\markboth{Bibliographie et Webographie}{}
+
+\begin{enumerate}[label={[\arabic*]}]
+    \item Dahir n° 1-92-31 portant promulgation de la loi n° 12-90 relative à l'urbanisme, Royaume du Maroc.
+    \item Dahir n° 1-92-7 portant promulgation de la loi n° 25-90 relative aux lotissements, groupes d'habitations et morcellement, Royaume du Maroc.
+    \item Lewis, P., et al. (2020). \textit{Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks}. Advances in Neural Information Processing Systems (NeurIPS).
+    \item Mikolov, T., et al. (2013). \textit{Efficient Estimation of Word Representations in Vector Space}. arXiv preprint arXiv:1301.3781.
+    \item Reimers, N., \& Gurevych, I. (2019). \textit{Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks}. EMNLP.
+    \item Documentation officielle de \textbf{FastAPI} -- \url{https://fastapi.tiangolo.com}
+    \item Documentation officielle de \textbf{PostgreSQL} et de l'extension \textbf{pgvector} -- \url{https://www.postgresql.org/docs/} et \url{https://github.com/pgvector/pgvector}
+    \item Documentation officielle de \textbf{React} -- \url{https://react.dev}
+    \item Documentation de l'API \textbf{Mistral AI} -- \url{https://docs.mistral.ai}
+    \item Documentation de \textbf{Faster-Whisper} -- \url{https://github.com/SYSTRAN/faster-whisper}
+    \item Documentation de \textbf{Tesseract OCR} -- \url{https://github.com/tesseract-ocr/tesseract}
+    \item Documentation de \textbf{Tailwind CSS} -- \url{https://tailwindcss.com/docs}
+    \item Documentation de \textbf{Poppler} -- \url{https://poppler.freedesktop.org/}
+\end{enumerate}
+
+% =====================================================
+% ANNEXES
+% =====================================================
+\appendix
+\chapter{Annexes}
+\addcontentsline{toc}{chapter}{Annexes}
+
+\section{Exemples de requêtes API}
+
+\begin{lstlisting}[language=bash, caption={Exemples de requêtes API}]
+# Inscription
+POST /api/auth/register
+{
+  "email": "citoyen@example.com",
+  "password": "motdepasse",
+  "first_name": "Mohamed",
+  "last_name": "Alaoui"
+}
+
+# Vérification OTP
+POST /api/auth/verify-otp
+{
+  "email": "citoyen@example.com",
+  "code": "847291"
+}
+
+# Connexion
+POST /api/auth/login
+{
+  "email": "citoyen@example.com",
+  "password": "motdepasse"
+}
+
+# Question texte
+POST /api/chat/message
+Authorization: Bearer <jwt_token>
+{
+  "message": "Quelles sont les sanctions de la loi 12-90 ?",
+  "conversation_id": "uuid"
+}
+
+# Question vocale
+POST /api/chat/voice
+Authorization: Bearer <jwt_token>
+Content-Type: multipart/form-data
+audio=<fichier_audio>
+\end{lstlisting}
+
+\section{Extrait de code du moteur RAG}
+
+\begin{lstlisting}[language=python, caption={Extrait détaillé du moteur RAG (chat/engine.py)}]
+import logging
+from mistralai.models.chat_completion import ChatMessage
+from sqlalchemy import text
+
+class ChatEngine:
+    def __init__(self, db_connection, mistral_client):
+        self.db = db_connection
+        self.mistral = mistral_client
+        self.embedding_model = "mistral-embed"
+        self.chat_model = "mistral-small-latest"
+        self.similarity_threshold = 0.45
+        
+    def search_articles(self, query_embedding, top_k=5):
+        try:
+            # Recherche vectorielle via pgvector (distance cosinus)
+            query = text("""
+                SELECT id, titre, contenu, loi_version, 
+                       1 - (embedding <=> :emb) AS similarity
+                FROM loi_articles
+                WHERE 1 - (embedding <=> :emb) > :threshold
+                ORDER BY similarity DESC LIMIT :k
+            """)
+            result = self.db.execute(query, {
+                "emb": str(query_embedding),
+                "threshold": self.similarity_threshold,
+                "k": top_k
+            }).fetchall()
+            return result
+        except Exception as e:
+            logging.error(f"Erreur pgvector: {str(e)}")
+            return []
+    
+    def process_query(self, user_id, query, history, language="auto"):
+        try:
+            # 1. Génération de l'embedding
+            emb_response = self.mistral.embeddings.create(
+                model=self.embedding_model,
+                inputs=[query]
+            )
+            query_embedding = emb_response.data[0].embedding
+            
+            # 2. Recherche sémantique
+            articles = self.search_articles(query_embedding)
+            
+            # 3. Construction du contexte et gestion de la mémoire
+            context = "\n".join([f"- {a.titre} : {a.contenu}" for a in articles])
+            messages = [{"role": "system", "content": "Vous êtes un expert..."}]
+            
+            # Intégration de la mémoire conversationnelle (5 derniers échanges)
+            for msg in history[-5:]: 
+                messages.append({"role": msg["role"], "content": msg["content"]})
+            messages.append({"role": "user", "content": f"Contexte:\n{context}\n\nQuestion:\n{query}"})
+            
+            # 4. Génération de la réponse via Mistral
+            response = self.mistral.chat.create(
+                model=self.chat_model,
+                messages=[ChatMessage(**m) for m in messages],
+                temperature=0.3
+            )
+            return response.choices[0].message.content, articles
+            
+        except Exception as e:
+            logging.error(f"Erreur API Mistral (Fallback activé): {str(e)}")
+            return "Une erreur technique est survenue. Veuillez réessayer.", []
+\end{lstlisting}
+
+\section{Structure du projet}
+
+\begin{lstlisting}[language=bash, caption={Structure du projet}]
+assistant-urbanisme/
+├── backend/
+│   ├── main.py                    # Point d'entrée FastAPI
+│   ├── requirements.txt           # Dépendances Python 3.13
+│   ├── .env.example               # Template de configuration
+│   ├── api/
+│   │   ├── routes_auth.py         # Authentification
+│   │   ├── routes_chat.py         # Chat (texte + vocal)
+│   │   └── routes_ocr.py          # OCR
+│   ├── auth/
+│   │   ├── auth_service.py        # Logique auth (OTP, JWT, bcrypt)
+│   │   └── auth_middleware.py     # Middleware JWT
+│   ├── chat/
+│   │   ├── engine.py              # Pipeline RAG
+│   │   └── stt.py                 # Speech-to-Text
+│   ├── database/
+│   │   └── connection.py          # Connexion PostgreSQL
+│   └── ocr/
+│       └── processor.py           # Pipeline OCR
+├── frontend/
+│   ├── package.json
+│   ├── tailwind.config.js
+│   └── src/
+│       ├── App.jsx                # Composant principal
+│       ├── components/
+│       │   ├── AuthPage.jsx       # Authentification
+│       │   ├── LandingPage.jsx    # Page d'accueil
+│       │   ├── Sidebar.jsx        # Barre latérale
+│       │   ├── MessageBubble.jsx  # Bulle de message
+│       │   └── InputBar.jsx       # Barre de saisie
+│       └── services/
+│           └── api.js             # Client API
+└── scripts/
+    └── setup_db.sql               # Initialisation base
+\end{lstlisting}
+
+\end{document}

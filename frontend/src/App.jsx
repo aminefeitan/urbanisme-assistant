@@ -16,6 +16,7 @@ import LandingPage from "./components/LandingPage";
 import AuthPage from "./components/AuthPage";
 import translations from "./translations";
 import SettingsPage from "./components/SettingsPage";
+import AdminDashboard from "./components/AdminDashboard";
 
 function getWelcome(lang) {
   return {
@@ -262,6 +263,18 @@ export default function App() {
         onBack={() => setAppState("landing")}
         language={language}
         onLanguageChange={handleLanguageChange}
+      />
+    );
+  }
+
+  // --- Admin view ---
+  if (appState === "chat" && user?.is_admin) {
+    return (
+      <AdminDashboard
+        user={user}
+        onLogout={handleLogout}
+        isLightMode={isLightMode}
+        onToggleTheme={() => setIsLightMode(!isLightMode)}
       />
     );
   }

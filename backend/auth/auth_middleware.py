@@ -21,7 +21,8 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         "email": payload["email"],
         "name": payload.get("name"),
         "first_name": payload.get("first_name"),
-        "last_name": payload.get("last_name")
+        "last_name": payload.get("last_name"),
+        "is_admin": payload.get("is_admin", False),
     }
 
 def get_current_user_optional(credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -45,6 +46,35 @@ def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(securi
             "email": payload["email"],
             "name": payload.get("name"),
             "first_name": payload.get("first_name"),
-            "last_name": payload.get("last_name")
+            "last_name": payload.get("last_name"),
+            "is_admin": payload.get("is_admin", False),
         }
     return None
+
+
+def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Dépendance FastAPI pour vérifier que l'utilisateur est admin."""
+    token = credentials.credentials
+    payload = decode_jwt_token(token)
+    
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token invalide ou expiré",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not payload.get("is_admin", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé aux administrateurs.",
+        )
+    
+    return {
+        "id": int(payload["sub"]),
+        "email": payload["email"],
+        "name": payload.get("name"),
+        "first_name": payload.get("first_name"),
+        "last_name": payload.get("last_name"),
+        "is_admin": True,
+    }

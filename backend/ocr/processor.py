@@ -17,10 +17,10 @@ TESSERACT_PATHS = [r"C:\Program Files\Tesseract-OCR\tesseract.exe"]
 for _t in TESSERACT_PATHS:
     if os.path.exists(_t):
         pytesseract.pytesseract.tesseract_cmd = _t
-        print(f"[OCR] ✅ Tesseract: {_t}")
+        print(f"[OCR] [OK] Tesseract: {_t}")
         break
 else:
-    print("[OCR] ⚠️  Tesseract not found at known paths — relying on PATH")
+    print("[OCR] [WARN] Tesseract not found at known paths — relying on PATH")
 
 # Poppler path for Windows (needed by pdf2image)
 POPPLER_PATHS = [r"C:\poppler-25.12.0\Library\bin"]
@@ -29,10 +29,10 @@ POPPLER_PATH = None
 for _p in POPPLER_PATHS:
     if os.path.exists(_p):
         POPPLER_PATH = _p
-        print(f"[OCR] ✅ Poppler: {_p}")
+        print(f"[OCR] [OK] Poppler: {_p}")
         break
 else:
-    print("[OCR] ⚠️  Poppler not found at known paths — relying on PATH")
+    print("[OCR] [WARN] Poppler not found at known paths — relying on PATH")
 
 
 # ─── Quick diagnostic (called on startup) ────────────────────────────────────
@@ -46,12 +46,12 @@ def diagnose():
         langs = pytesseract.get_languages()
         print(f"  Languages available: {langs}")
         if "ara" not in langs:
-            print("  ⚠️  Arabic (ara) NOT installed — OCR quality will be poor for Arabic text")
+            print("  [WARN] Arabic (ara) NOT installed — OCR quality will be poor for Arabic text")
         if "fra" not in langs:
-            print("  ⚠️  French (fra) NOT installed")
+            print("  [WARN] French (fra) NOT installed")
     except Exception as e:
-        print(f"  ❌ Tesseract ERROR: {e}")
-        print("  → Make sure Tesseract is installed and in PATH")
+        print(f"  [FAIL] Tesseract ERROR: {e}")
+        print("  -> Make sure Tesseract is installed and in PATH")
 
     try:
         from pdf2image.exceptions import PDFInfoNotInstalledError
@@ -92,11 +92,11 @@ def ocr_image(image: Image.Image, lang: str = "fra+ara") -> str:
     try:
         return pytesseract.image_to_string(processed, lang=lang, config=config)
     except Exception as e:
-        print(f"  [OCR] ⚠️  lang='{lang}' failed ({e}), retrying with 'fra'")
+        print(f"  [OCR] [WARN] lang='{lang}' failed ({e}), retrying with 'fra'")
         try:
             return pytesseract.image_to_string(processed, lang="fra", config=config)
         except Exception as e2:
-            print(f"  [OCR] ❌ OCR completely failed: {e2}")
+            print(f"  [OCR] [FAIL] OCR completely failed: {e2}")
             return ""
 
 

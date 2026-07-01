@@ -211,3 +211,108 @@ export async function updateProfile(firstName, lastName) {
   return res.json();
 }
 
+// --- Admin Endpoints ---
+
+export async function getAdminStats() {
+  const res = await fetch(`${BASE}/admin/stats`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Accès refusé");
+  return res.json();
+}
+
+export async function getAdminArticles(limit = 50, offset = 0, loi_version = "") {
+  const url = loi_version 
+    ? `${BASE}/admin/articles?limit=${limit}&offset=${offset}&loi_version=${loi_version}`
+    : `${BASE}/admin/articles?limit=${limit}&offset=${offset}`;
+  const res = await fetch(url, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Erreur chargement articles");
+  return res.json();
+}
+
+export async function deleteAdminArticle(id) {
+  const res = await fetch(`${BASE}/admin/articles/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Erreur suppression");
+  return res.json();
+}
+
+export async function resetAdminArticles() {
+  const res = await fetch(`${BASE}/admin/articles`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Erreur réinitialisation");
+  return res.json();
+}
+
+export async function updateAdminArticle(id, titre, contenu) {
+  const res = await fetch(`${BASE}/admin/articles/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ titre, contenu })
+  });
+  if (!res.ok) throw new Error("Erreur mise à jour article");
+  return res.json();
+}
+
+export async function adminUploadPDF(file, loiVersion = "12-90") {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("loi_version", loiVersion);
+  const headers = {};
+  const token = localStorage.getItem("authToken");
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${BASE}/admin/upload-pdf`, {
+    method: "POST",
+    headers,
+    body: form,
+  });
+  if (!res.ok) throw new Error("Erreur upload PDF");
+  return res.json();
+}
+
+export async function getAssistantConfig() {
+  const res = await fetch(`${BASE}/admin/config`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Erreur chargement configuration");
+  return res.json();
+}
+
+export async function updateAssistantConfig(systemPrompt, temperature) {
+  const res = await fetch(`${BASE}/admin/config`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ system_prompt: systemPrompt, temperature }),
+  });
+  if (!res.ok) throw new Error("Erreur mise à jour configuration");
+  return res.json();
+}
+
+export async function getAdminUsers(limit = 50, offset = 0) {
+  const res = await fetch(`${BASE}/admin/users?limit=${limit}&offset=${offset}`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Erreur chargement utilisateurs");
+  return res.json();
+}
+
+export async function deleteAdminUser(id) {
+  const res = await fetch(`${BASE}/admin/users/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Erreur suppression utilisateur");
+  return res.json();
+}
+
+export async function getPublicContent(key) {
+  const res = await fetch(`${BASE}/content/${key}`);
+  if (!res.ok) throw new Error("Erreur chargement contenu");
+  return res.json();
+}

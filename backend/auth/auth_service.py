@@ -5,7 +5,6 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import jwt
 import os
-from passlib.context import CryptContext
 from database.connection import get_connection
 
 SMTP_EMAIL = os.getenv("SMTP_EMAIL", "")
@@ -13,15 +12,20 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 JWT_SECRET = os.getenv("JWT_SECRET", "super-secret-key-for-dev")
 
 # --- Password Hashing ---
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import bcrypt
 
 def get_password_hash(password: str) -> str:
     """Hache un mot de passe en utilisant bcrypt."""
-    return pwd_context.hash(password[:72])
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password[:72].encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Vérifie un mot de passe en clair contre son hash."""
-    return pwd_context.verify(plain_password[:72], hashed_password)
+    try:
+        return bcrypt.checkpw(plain_password[:72].encode('utf-8'), hashed_password.encode('utf-8'))
+    except Exception:
+        return False
 
 
 # --- OTP ---
@@ -185,7 +189,7 @@ def mark_user_verified(email: str):
         cur.execute(
             """UPDATE users SET is_verified = true, last_login = %s 
                WHERE email = %s 
-               RETURNING id, email, first_name, last_name, name""",
+               RETURNING id, email, first_name, last_name, name, is_admin""",
             (datetime.now(), email)
         )
         user = cur.fetchone()
@@ -198,6 +202,7 @@ def mark_user_verified(email: str):
             "first_name": user[2],
             "last_name": user[3],
             "name": user[4],
+            "is_admin": user[5] or False,
         }
     except Exception as e:
         print(f"Erreur lors de la vérification: {e}")
@@ -243,7 +248,7 @@ def login_user(email: str, password: str):
     cur = conn.cursor()
     try:
         cur.execute(
-            "SELECT id, email, first_name, last_name, name, password_hash, is_verified FROM users WHERE email = %s",
+            "SELECT id, email, first_name, last_name, name, password_hash, is_verified, is_admin FROM users WHERE email = %s",
             (email,)
         )
         user = cur.fetchone()
@@ -252,7 +257,7 @@ def login_user(email: str, password: str):
             print(f"DEBUG: User not found for email {email}")
             return None, "Email ou mot de passe incorrect."
         
-        user_id, user_email, first_name, last_name, name, password_hash, is_verified = user
+        user_id, user_email, first_name, last_name, name, password_hash, is_verified, is_admin = user
         
         if not password_hash:
             print(f"DEBUG: No password hash for email {email}")
@@ -276,6 +281,7 @@ def login_user(email: str, password: str):
             "first_name": first_name,
             "last_name": last_name,
             "name": name,
+            "is_admin": is_admin or False,
         }, None
     except Exception as e:
         print(f"Erreur lors de la connexion: {e}")
@@ -325,6 +331,7 @@ def create_jwt_token(user_data: dict):
         "name": user_data.get("name") or f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip(),
         "first_name": user_data.get("first_name", ""),
         "last_name": user_data.get("last_name", ""),
+        "is_admin": user_data.get("is_admin", False),
         "exp": expiration
     }
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
